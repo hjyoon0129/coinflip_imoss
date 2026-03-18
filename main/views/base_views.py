@@ -26,7 +26,8 @@ from ..models import (
 
 
 FREE_DAILY_LIMIT = 3
-PAID_DAILY_LIMIT = 10
+PRO_DAILY_LIMIT = 10
+PRO_PLUS_DAILY_LIMIT = 30
 
 LEMON_API_BASE = "https://api.lemonsqueezy.com/v1"
 GUEST_COOKIE_NAME = "guest_id"
@@ -172,8 +173,45 @@ def inc_used_plays_atomic(request, today: date) -> int:
         return int(obj.plays)
 
 
-def get_base_daily_limit(*, is_paid: bool) -> int:
-    return PAID_DAILY_LIMIT if is_paid else FREE_DAILY_LIMIT
+def get_subscription_plan(sub) -> str:
+    """
+    return: free / pro / pro_plus
+    """
+    if not sub:
+        return "free"
+
+    try:
+        is_active = bool(sub.is_active())
+    except Exception:
+        is_active = False
+
+    if not is_active:
+        return "free"
+
+    variant_id = str(getattr(sub, "variant_id", "") or "").strip()
+
+    pro_variant_id = str(getattr(settings, "LEMON_SQUEEZY_PRO_VARIANT_ID", "") or "").strip()
+    pro_plus_variant_id = str(getattr(settings, "LEMON_SQUEEZY_PRO_PLUS_VARIANT_ID", "") or "").strip()
+
+    if variant_id and pro_plus_variant_id and variant_id == pro_plus_variant_id:
+        return "pro_plus"
+
+    if variant_id and pro_variant_id and variant_id == pro_variant_id:
+        return "pro"
+
+    legacy_variant_id = str(getattr(settings, "LEMON_SQUEEZY_VARIANT_ID", "") or "").strip()
+    if variant_id and legacy_variant_id and variant_id == legacy_variant_id:
+        return "pro"
+
+    return "pro"
+
+
+def get_base_daily_limit(*, plan: str) -> int:
+    if plan == "pro_plus":
+        return PRO_PLUS_DAILY_LIMIT
+    if plan == "pro":
+        return PRO_DAILY_LIMIT
+    return FREE_DAILY_LIMIT
 
 
 def get_user_turn_bonus_sum(user) -> int:
@@ -224,6 +262,7 @@ def get_daily_limit_components(request) -> dict:
     is_paid = False
     admin_unlocked = False
     subscription_extra = 0
+    plan = "free"
 
     if is_authed:
         sub = _get_or_create_subscription_for_user(request.user)
@@ -235,13 +274,16 @@ def get_daily_limit_components(request) -> dict:
         except Exception:
             is_paid = False
 
-    base_limit = get_base_daily_limit(is_paid=is_paid)
+        plan = get_subscription_plan(sub)
+
+    base_limit = get_base_daily_limit(plan=plan)
 
     if admin_unlocked:
         final_limit = 10_000_000
         return {
             "is_authed": is_authed,
             "is_paid": is_paid,
+            "plan": plan,
             "admin_unlocked": True,
             "base_limit": int(base_limit),
             "subscription_extra": int(subscription_extra),
@@ -266,6 +308,7 @@ def get_daily_limit_components(request) -> dict:
     return {
         "is_authed": is_authed,
         "is_paid": is_paid,
+        "plan": plan,
         "admin_unlocked": False,
         "base_limit": int(base_limit),
         "subscription_extra": int(subscription_extra),
@@ -286,6 +329,7 @@ def build_game_ctx(request) -> dict:
     return {
         "is_authed": limit_info["is_authed"],
         "is_paid": limit_info["is_paid"],
+        "plan": limit_info["plan"],
         "daily_limit": int(limit),
         "daily_used": int(used),
         "daily_remaining": int(remaining),
@@ -300,7 +344,11 @@ def build_game_ctx(request) -> dict:
         "lemon_checkout_enabled": bool(
             getattr(settings, "LEMON_SQUEEZY_API_KEY", "")
             and getattr(settings, "LEMON_SQUEEZY_STORE_ID", "")
-            and getattr(settings, "LEMON_SQUEEZY_VARIANT_ID", "")
+            and (
+                getattr(settings, "LEMON_SQUEEZY_PRO_VARIANT_ID", "")
+                or getattr(settings, "LEMON_SQUEEZY_PRO_PLUS_VARIANT_ID", "")
+                or getattr(settings, "LEMON_SQUEEZY_VARIANT_ID", "")
+            )
         ),
     }
 
@@ -470,12 +518,30 @@ def _save_subscription_from_webhook(*, user, payload: dict):
     ends_at = _parse_ls_datetime(attrs.get("ends_at"))
     trial_ends_at = _parse_ls_datetime(attrs.get("trial_ends_at"))
 
+    variant_id = ""
+    variant_rel = (((payload.get("data") or {}).get("relationships") or {}).get("variant") or {}).get("data") or {}
+    if variant_rel:
+        variant_id = str(variant_rel.get("id") or "").strip()
+
     rec = _get_or_create_subscription_for_user(user)
     rec.customer_id = customer_id or getattr(rec, "customer_id", "")
     rec.subscription_id = sub_id or getattr(rec, "subscription_id", "")
     rec.status = status or getattr(rec, "status", "")
     rec.current_period_end = renews_at or trial_ends_at or ends_at
-    rec.save()
+
+    if hasattr(rec, "variant_id"):
+        rec.variant_id = variant_id or getattr(rec, "variant_id", "")
+
+    update_fields = [
+        "customer_id",
+        "subscription_id",
+        "status",
+        "current_period_end",
+    ]
+    if hasattr(rec, "variant_id"):
+        update_fields.append("variant_id")
+
+    rec.save(update_fields=update_fields)
 
 
 # ========= pages =========
@@ -515,6 +581,7 @@ def api_can_play(request):
         "limit": ctx["daily_limit"],
         "remaining": ctx["daily_remaining"],
         "is_paid": ctx["is_paid"],
+        "plan": ctx["plan"],
         "is_authed": ctx["is_authed"],
         "admin_unlocked": ctx["admin_unlocked"],
         "base_limit": ctx["base_limit"],
@@ -733,15 +800,28 @@ def api_create_checkout_session(request):
 
     api_key = getattr(settings, "LEMON_SQUEEZY_API_KEY", "")
     store_id = getattr(settings, "LEMON_SQUEEZY_STORE_ID", "")
-    variant_id = getattr(settings, "LEMON_SQUEEZY_VARIANT_ID", "")
     site_url = getattr(settings, "SITE_URL", "")
 
     if not api_key:
         return HttpResponseBadRequest("missing LEMON_SQUEEZY_API_KEY")
     if not store_id:
         return HttpResponseBadRequest("missing LEMON_SQUEEZY_STORE_ID")
+
+    try:
+        payload_in = json.loads(request.body.decode("utf-8")) if request.body else {}
+    except Exception:
+        payload_in = {}
+
+    plan = str(payload_in.get("plan", "pro") or "pro").strip().lower()
+
+    if plan == "pro_plus":
+        variant_id = getattr(settings, "LEMON_SQUEEZY_PRO_PLUS_VARIANT_ID", "")
+    else:
+        plan = "pro"
+        variant_id = getattr(settings, "LEMON_SQUEEZY_PRO_VARIANT_ID", "")
+
     if not variant_id:
-        return HttpResponseBadRequest("missing LEMON_SQUEEZY_VARIANT_ID")
+        return HttpResponseBadRequest(f"missing variant id for plan={plan}")
 
     attributes = {
         "checkout_data": {
@@ -749,6 +829,7 @@ def api_create_checkout_session(request):
             "name": request.user.get_username() or "",
             "custom": {
                 "user_id": request.user.id,
+                "plan": plan,
             },
         },
         "product_options": {
@@ -757,7 +838,7 @@ def api_create_checkout_session(request):
     }
 
     if site_url:
-        attributes["product_options"]["redirect_url"] = f"{site_url}/main/coinflip/?paid=1"
+        attributes["product_options"]["redirect_url"] = f"{site_url}/main/coinflip/?paid=1&plan={plan}"
 
     payload = {
         "data": {
@@ -787,7 +868,7 @@ def api_create_checkout_session(request):
         if not checkout_url:
             return JsonResponse({"ok": False, "reason": "checkout_url_missing"}, status=500)
 
-        return JsonResponse({"ok": True, "url": checkout_url})
+        return JsonResponse({"ok": True, "url": checkout_url, "plan": plan})
     except Exception as e:
         return JsonResponse(
             {"ok": False, "reason": "lemon_checkout_failed", "detail": str(e)},
