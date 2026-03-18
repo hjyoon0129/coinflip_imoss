@@ -1,0 +1,162 @@
+{% if user.is_authenticated and needs_nickname %}
+<div id="nicknameModal" class="nickname-modal">
+    <div class="nickname-modal__backdrop"></div>
+
+    <div class="nickname-modal__card">
+        <h2 class="nickname-modal__title">Choose Your Nickname</h2>
+        <p class="nickname-modal__desc">
+            Set the nickname to display on the leaderboard before playing.
+        </p>
+
+        <form id="nicknameForm" class="nickname-modal__form">
+            {% csrf_token %}
+            <label for="nicknameInput" class="nickname-modal__label">Nickname</label>
+            <input
+                id="nicknameInput"
+                name="nickname"
+                type="text"
+                maxlength="30"
+                placeholder="Enter your nickname"
+                class="nickname-modal__input"
+                required
+            >
+            <div id="nicknameError" class="nickname-modal__error"></div>
+            <button type="submit" class="nickname-modal__button">Save and Continue</button>
+        </form>
+    </div>
+</div>
+
+<style>
+.nickname-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+}
+
+.nickname-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.nickname-modal__card {
+    position: relative;
+    width: min(92vw, 420px);
+    margin: 10vh auto 0;
+    background: #111827;
+    color: #f9fafb;
+    border-radius: 18px;
+    padding: 28px 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nickname-modal__title {
+    margin: 0 0 10px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.nickname-modal__desc {
+    margin: 0 0 20px;
+    color: #cbd5e1;
+    line-height: 1.5;
+}
+
+.nickname-modal__form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nickname-modal__label {
+    font-size: 14px;
+    color: #cbd5e1;
+}
+
+.nickname-modal__input {
+    height: 48px;
+    border-radius: 12px;
+    border: 1px solid #374151;
+    background: #0f172a;
+    color: #f9fafb;
+    padding: 0 14px;
+    font-size: 16px;
+    outline: none;
+}
+
+.nickname-modal__input:focus {
+    border-color: #60a5fa;
+}
+
+.nickname-modal__error {
+    min-height: 20px;
+    color: #f87171;
+    font-size: 14px;
+}
+
+.nickname-modal__button {
+    margin-top: 6px;
+    height: 48px;
+    border: 0;
+    border-radius: 12px;
+    background: #2563eb;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.nickname-modal__button:hover {
+    background: #1d4ed8;
+}
+</style>
+
+<script>
+(function () {
+    const form = document.getElementById("nicknameForm");
+    const input = document.getElementById("nicknameInput");
+    const errorBox = document.getElementById("nicknameError");
+    const modal = document.getElementById("nicknameModal");
+
+    if (!form) return;
+
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        errorBox.textContent = "";
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch("/user/save-nickname/", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.ok) {
+                modal.remove();
+                return;
+            }
+
+            if (data.errors && data.errors.nickname && data.errors.nickname.length > 0) {
+                errorBox.textContent = data.errors.nickname[0];
+            } else if (data.error) {
+                errorBox.textContent = data.error;
+            } else {
+                errorBox.textContent = "Failed to save nickname.";
+            }
+        } catch (err) {
+            errorBox.textContent = "Failed to save nickname.";
+        }
+    });
+
+    input.focus();
+})();
+</script>
+{% endif %}

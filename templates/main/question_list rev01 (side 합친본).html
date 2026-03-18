@@ -1,0 +1,778 @@
+{% extends 'base.html' %}
+{% load main_filter %}
+
+{% block content %}
+
+<style>
+/* 전체 컨테이너 스타일 */
+.container {
+    display: flex;
+    justify-content: center; /* 가운데 정렬 */
+    width: 100%;
+    padding: 10px;
+}
+
+/* 박스 스타일 */
+.input-output-box {
+    display: flex;
+    flex-direction: row; /* 왼쪽과 오른쪽으로 배치 */
+    width: 100%; /* 박스의 크기 설정 */
+    max-width: 900px; /* 최대 너비 설정, 좌우 여백을 줄이기 위해 설정 */
+    justify-content: space-between; /* 양쪽에 배치 */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px; /* 안쪽 여백 설정 */
+}
+
+/* 가운데 점선 */
+.input-box {
+    border-right: 2px dashed #ccc; /* 점선으로 구분선 추가 */
+    padding-right: 20px; /* 오른쪽 여백 추가 */
+    flex: 1;
+}
+
+/* 'FROM' 박스 스타일 */
+.result-box {
+    padding-left: 20px; /* 'FROM'과 'TO' 박스 사이 간격 추가 */
+    flex: 1;
+}
+
+/* 입력 박스 크기 줄이기 */
+#inputValue,
+#outputValue {
+    width: 70%; /* 입력창 너비 줄이기 */
+    padding: 5px; /* 여백 줄이기 */
+    font-size: 0.9em; /* 폰트 크기 줄이기 */
+    margin-bottom: 10px; /* 아래 여백 추가 */
+    margin-left: 3px; /* 왼쪽 여백 추가 */
+}
+
+
+/* 버튼 스타일 */
+.unit-group h4 {
+    font-size: 14px;
+}
+
+.buttons button {
+    border: 1px solid #ccc;
+    background-color: #f3f3f3;
+    padding: 3px 6px; /* 버튼 크기 작게 설정 */
+    font-size: 0.8em; /* 버튼 텍스트 크기 */
+    cursor: pointer;
+    margin: 3px; /* 버튼 간 간격 */
+    width: auto; /* 버튼 크기를 자동으로 맞춤 */
+    height: 30px; /* 고정된 높이로 네모난 형태 */
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    border-radius: 5px; /* 둥근 모서리 추가 */
+    white-space: nowrap; /* 버튼 텍스트가 잘리지 않도록 */
+}
+
+.buttons button:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* 버튼들 가로로 배열, 겹쳐지도록 */
+.buttons {
+    display: flex;
+    flex-wrap: wrap; /* 버튼들이 한 줄에 겹치도록 설정 */
+    gap: 5px; /* 버튼들 사이의 간격 */
+    justify-content: flex-start; /* 왼쪽 정렬 */
+}
+
+/* 미디어 쿼리 */
+@media screen and (max-width: 768px) {
+    .container {
+        flex-direction: column; /* 세로로 배치 */
+        justify-content: flex-start; /* 왼쪽 정렬 */
+        align-items: center; /* 가운데 정렬 */
+    }
+
+    .input-output-box {
+        flex-direction: row; /* 여전히 가로로 배치 */
+        width: 105%; /* 전체 너비로 설정 */
+        justify-content: center; /* 가운데 정렬 */
+        max-width: 600px; /* 최대 너비 제한 */
+    }
+
+    .input-box,
+    .result-box {
+        width: 100%; /* 전체 너비 */
+        height: 120%;
+        max-width: 600px; /* 최대 너비 제한 */
+        margin: 3px; /* 간격을 3px로 설정 */
+    }
+
+    /* area, volume, weight에 위아래 마진 추가 */
+    .unit-group {
+        margin-top: 2px; /* 위쪽 여백 추가 */
+        margin-bottom: 2px; /* 아래쪽 여백 추가 */
+    }
+
+    /* 버튼 크기 더 작게 */
+    .buttons button {
+        padding: 3px 6px;
+        font-size: 0.8em;
+        height: 30px;
+    }
+}
+
+</style>
+
+<div class="container">
+    <div class="input-output-box">
+        <!-- Input Box -->
+        <div class="input-box">
+            <h3>FROM</h3>
+            <div class="input-container">
+                <input type="number" id="inputValue" placeholder="Click">
+                <span id="selectedUnit"></span>
+            </div>
+
+            <!-- 길이 단위 -->
+            <div class="unit-group" id="length">
+                <h4>Length</h4>
+                <div class="buttons">
+                    <button onclick="setInputUnit('mm')" id="mmBtn">mm</button>
+                    <button onclick="setInputUnit('cm')" id="cmBtn">cm</button>
+                    <button onclick="setInputUnit('m')" id="mBtn">m</button>
+                    <button onclick="setInputUnit('km')" id="kmBtn">km</button>
+                    <button onclick="setInputUnit('inch')" id="inchBtn">in</button>
+                    <button onclick="setInputUnit('ft')" id="ftBtn">ft</button>
+                    <button onclick="setInputUnit('yd')" id="ydBtn">yd</button>
+                    <button onclick="setInputUnit('mile')" id="mileBtn">mile</button>
+                    <button onclick="setInputUnit('px')" id="pxBtn">px</button>
+                </div>
+            </div>
+
+            <!-- 넓이 단위 -->
+            <div class="unit-group" id="area">
+                <h4>Area</h4>
+                <div class="buttons">
+                    <button onclick="setInputUnit('m2')" id="m2Btn">m<sup>2</sup></button>
+                    <button onclick="setInputUnit('cm2')" id="cm2Btn">cm<sup>2</sup></button>
+                    <button onclick="setInputUnit('mm2')" id="mm2Btn">mm<sup>2</sup></button>
+                    <button onclick="setInputUnit('ft2')" id="ft2Btn">ft<sup>2</sup></button>
+                    <button onclick="setInputUnit('acre')" id="acreBtn">acre</button>
+                </div>
+            </div>
+
+            <!-- 부피 단위 -->
+            <div class="unit-group" id="volume">
+                <h4>Volume</h4>
+                <div class="buttons">
+                    <button onclick="setInputUnit('m3')" id="m3Btn">m<sup>3</sup></button>
+                    <button onclick="setInputUnit('cm3')" id="cm3Btn">cm<sup>3</sup></button>
+                    <button onclick="setInputUnit('mm3')" id="mm3Btn">mm<sup>3</sup></button>
+                    <button onclick="setInputUnit('liter')" id="literBtn">liter</button>
+                    <button onclick="setInputUnit('ft3')" id="ft3Btn">ft<sup>3</sup></button>
+                    <button onclick="setInputUnit('gal')" id="galBtn">gal</button>
+                </div>
+            </div>
+
+            <!-- 무게 단위 -->
+            <div class="unit-group" id="weight">
+                <h4>Weight</h4>
+                <div class="buttons">
+                    <button onclick="setInputUnit('kg')" id="kgBtn">kg</button>
+                    <button onclick="setInputUnit('g')" id="gBtn">g</button>
+                    <button onclick="setInputUnit('lb')" id="lbBtn">lb</button>
+                    <button onclick="setInputUnit('oz')" id="ozBtn">oz</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Box -->
+        <div class="result-box">
+            <h3>TO</h3>
+            <div class="result-container">
+                <input type="number" id="outputValue" readonly disabled>
+                <span id="selectedOutputUnit"></span>
+            </div>
+
+            <!-- 길이 단위 결과 버튼 -->
+            <div class="unit-group" id="lengthResult">
+                <h4>Length</h4>
+                <div class="buttons">
+                    <button onclick="convertTo('mm')" id="mmResultBtn">mm</button>
+                    <button onclick="convertTo('cm')" id="cmResultBtn">cm</button>
+                    <button onclick="convertTo('m')" id="mResultBtn">m</button>
+                    <button onclick="convertTo('km')" id="kmResultBtn">km</button>
+                    <button onclick="convertTo('inch')" id="inchResultBtn">in</button>
+                    <button onclick="convertTo('ft')" id="ftResultBtn">ft</button>
+                    <button onclick="convertTo('yd')" id="ydResultBtn">yd</button>
+                    <button onclick="convertTo('mile')" id="mileResultBtn">mile</button>
+                    <button onclick="convertTo('px')" id="pxResultBtn">px</button>
+                </div>
+            </div>
+
+            <!-- 넓이 단위 결과 버튼 -->
+            <div class="unit-group" id="areaResult">
+                <h4>Area</h4>
+                <div class="buttons">
+                    <button onclick="convertTo('m2')" id="m2ResultBtn">m<sup>2</sup></button>
+                    <button onclick="convertTo('cm2')" id="cm2ResultBtn">cm<sup>2</sup></button>
+                    <button onclick="convertTo('mm2')" id="mm2ResultBtn">mm<sup>2</sup></button>
+                    <button onclick="convertTo('ft2')" id="ft2ResultBtn">ft<sup>2</sup></button>
+                    <button onclick="convertTo('acre')" id="acreResultBtn">acre</button>
+                </div>
+            </div>
+
+            <!-- 부피 단위 결과 버튼 -->
+            <div class="unit-group" id="volumeResult">
+                <h4>Volume</h4>
+                <div class="buttons">
+                    <button onclick="convertTo('m3')" id="m3ResultBtn">m<sup>3</sup></button>
+                    <button onclick="convertTo('cm3')" id="cm3ResultBtn">cm<sup>3</sup></button>
+                    <button onclick="convertTo('mm3')" id="mm3ResultBtn">mm<sup>3</sup></button>
+                    <button onclick="convertTo('liter')" id="literResultBtn">liter</button>
+                    <button onclick="convertTo('ft3')" id="ft3ResultBtn">ft<sup>3</sup></button>
+                    <button onclick="convertTo('gal')" id="galResultBtn">gal</button>
+                </div>
+            </div>
+
+            <!-- 무게 단위 결과 버튼 -->
+            <div class="unit-group" id="weightResult">
+                <h4>Weight</h4>
+                <div class="buttons">
+                    <button onclick="convertTo('kg')" id="kgResultBtn">kg</button>
+                    <button onclick="convertTo('g')" id="gResultBtn">g</button>
+                    <button onclick="convertTo('lb')" id="lbResultBtn">lb</button>
+                    <button onclick="convertTo('oz')" id="ozResultBtn">oz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<script>
+let inputValue = 0;
+let inputUnit = '';
+let outputUnit = '';
+let lastClickedInputUnitBtn = null;
+let lastClickedResultUnitBtn = null;
+let activeInput = null; // 현재 활성화된 입력 요소
+
+// 현재 활성화된 입력 요소를 설정하는 함수
+function setActiveInput(inputId) {
+  activeInput = inputId;
+}
+
+// 현재 활성화된 입력 요소에 값을 추가하는 함수
+function appendToActiveInput(value) {
+  if (activeInput === 'calculatorInput') {
+    appendToDisplay(value);
+  } else if (activeInput === 'unitConversionInput') {
+    appendToUnitConversionInput(value);
+  }
+}
+
+// 라디오 버튼 클릭 시 활성화된 입력 요소 설정
+document.querySelectorAll('input[type=radio]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    if (this.value === 'calculator') {
+      setActiveInput('calculatorInput');
+    } else if (this.value === 'unitConversion') {
+      setActiveInput('unitConversionInput');
+    }
+  });
+});
+
+function setInputUnit(unit) {
+    inputUnit = unit;
+    document.getElementById("selectedUnit").textContent = unit;
+    if (lastClickedInputUnitBtn) {
+        lastClickedInputUnitBtn.style.backgroundColor = '';
+    }
+    lastClickedInputUnitBtn = document.getElementById(unit + "Btn");
+    lastClickedInputUnitBtn.style.backgroundColor = 'orange';
+    if (unit === 'm3' || unit === 'cm3' || unit === 'ft3') {
+        convertToVolume(outputUnit);
+    } else {
+        convertTo(outputUnit); // 왼쪽 단위가 변경될 때마다 결과 업데이트
+    }
+}
+
+function convertTo(unit) {
+    if (inputUnit === unit) {
+        // 입력과 출력 단위가 동일할 때 결과를 표시
+        document.getElementById("outputValue").value = inputValue;
+        document.getElementById("selectedOutputUnit").textContent = unit;
+        if (lastClickedResultUnitBtn) {
+            lastClickedResultUnitBtn.style.backgroundColor = '';
+        }
+        lastClickedResultUnitBtn = document.getElementById(unit + "ResultBtn");
+        lastClickedResultUnitBtn.style.backgroundColor = 'orange';
+
+        outputUnit = unit; // 이 부분 추가
+        return;
+    }
+
+    const conversions = {
+        'mm': {
+            'cm': inputValue * 0.1,
+            'm': inputValue * 0.001,
+            'km': inputValue * 0.000001,
+            'inch': inputValue * 0.0393701,
+            'ft': inputValue * 0.00328084,
+            'yd': inputValue * 0.00109361,
+            'mile': inputValue * 0.000000621371,
+            'px': inputValue * 3.779528
+        },
+        'cm': {
+            'mm': inputValue * 10,
+            'm': inputValue * 0.01,
+            'km': inputValue * 0.00001,
+            'inch': inputValue * 0.393701,
+            'ft': inputValue * 0.0328084,
+            'yd': inputValue * 0.0109361,
+            'mile': inputValue * 0.00000621371,
+            'px': inputValue * 37.79528
+        },
+        'm': {
+            'mm': inputValue * 1000,
+            'cm': inputValue * 100,
+            'km': inputValue * 0.001,
+            'inch': inputValue * 39.3701,
+            'ft': inputValue * 3.28084,
+            'yd': inputValue * 1.09361,
+            'mile': inputValue * 0.000621371,
+            'px': inputValue * 39370.1
+        },
+        'km': {
+            'mm': inputValue * 1000000,
+            'cm': inputValue * 100000,
+            'm': inputValue * 1000,
+            'inch': inputValue * 39370.1,
+            'ft': inputValue * 3280.84,
+            'yd': inputValue * 1093.61,
+            'mile': inputValue * 0.621371,
+            'px': inputValue * 39370078.74
+        },
+        'inch': {
+            'mm': inputValue * 25.4,
+            'cm': inputValue * 2.54,
+            'm': inputValue * 0.0254,
+            'km': inputValue * 0.0000254,
+            'ft': inputValue * 0.0833333,
+            'yd': inputValue * 0.0277778,
+            'mile': inputValue * 0.0000157828,
+            'px': inputValue * 96
+        },
+        'ft': {
+            'mm': inputValue * 304.8,
+            'cm': inputValue * 30.48,
+            'm': inputValue * 0.3048,
+            'km': inputValue * 0.0003048,
+            'inch': inputValue * 12,
+            'yd': inputValue * 0.333333,
+            'mile': inputValue * 0.000189394,
+            'px': inputValue * 1152
+        },
+        'yd': {
+            'mm': inputValue * 914.4,
+            'cm': inputValue * 91.44,
+            'm': inputValue * 0.9144,
+            'km': inputValue * 0.0009144,
+            'inch': inputValue * 36,
+            'ft': inputValue * 3,
+            'mile': inputValue * 0.000568182,
+            'px': inputValue * 3456
+        },
+        'mile': {
+            'mm': inputValue * 1609344,
+            'cm': inputValue * 160934.4,
+            'm': inputValue * 1609.344,
+            'km': inputValue * 1.60934,
+            'inch': inputValue * 63360,
+            'ft': inputValue * 5280,
+            'yd': inputValue * 1760,
+            'px': inputValue * 63360000
+        },
+
+        'px': {
+            'mm': inputValue * 0.264583,
+            'cm': inputValue * 0.0264583,
+            'm': inputValue * 0.000264583,
+            'km': inputValue * 2.64583e-7,
+            'inch': inputValue * 0.0104167,
+            'ft': inputValue * 0.000868056,
+            'yd': inputValue * 0.000289352,
+            'mile': inputValue * 1.57828e-7,
+            'px': inputValue
+        },
+
+
+
+        // 부피 단위 변환 부분 추가
+        'm3': {
+            'liter': inputValue * 1000,
+            'cm3': inputValue * 1000000,
+            'ft3': inputValue * 35.3147,
+            'gal': inputValue * 264.172,
+            'mm3': inputValue * 1000000000 // mm3 추가
+        },
+        'liter': {
+            'm3': inputValue * 0.001,
+            'cm3': inputValue * 1000,
+            'ft3': inputValue * 0.0353147,
+            'gal': inputValue * 0.264172,
+            'mm3': inputValue * 1000000 // mm3 추가
+        },
+        'cm3': {
+            'm3': inputValue * 0.000001,
+            'liter': inputValue * 0.001,
+            'ft3': inputValue * 0.0000353147,
+            'gal': inputValue * 0.000264172,
+            'mm3': inputValue * 0.001 // mm3 추가
+        },
+        'ft3': {
+            'm3': inputValue * 0.0283168,
+            'liter': inputValue * 28.3168,
+            'cm3': inputValue * 28316.8,
+            'gal': inputValue * 7.48052,
+            'mm3': inputValue * 28316846.6 // mm3 추가
+        },
+        'gal': {
+            'm3': inputValue * 0.00378541,
+            'liter': inputValue * 3.78541,
+            'cm3': inputValue * 3785.41,
+            'ft3': inputValue * 0.133681,
+            'mm3': inputValue * 3785412 // mm3 추가
+        },
+        'mm3': {
+            'm3': inputValue * 0.000000001, // 추가
+            'liter': inputValue * 0.000001, // 추가
+            'cm3': inputValue * 0.001, // 추가
+            'ft3': inputValue * 0.0000000353147, // 추가
+            'gal': inputValue * 0.000000264172 // 추가
+        },
+
+        // 면적 단위 변환 부분 추가
+        'm2': {
+            'cm2': inputValue * 10000,
+            'ft2': inputValue * 10.7639,
+            'acre': inputValue * 0.000247105,
+            'mm2': inputValue * 1000000 // mm2 추가
+        },
+        'cm2': {
+            'm2': inputValue * 0.0001,
+            'ft2': inputValue * 0.00107639,
+            'acre': inputValue * 0.000000247105,
+            'mm2': inputValue * 100 // mm2 추가
+        },
+        'ft2': {
+            'm2': inputValue * 0.092903,
+            'cm2': inputValue * 929.03,
+            'acre': inputValue * 0.0000229568,
+            'mm2': inputValue * 92903.04 // mm2 추가
+        },
+        'acre': {
+            'm2': inputValue * 4046.86,
+            'cm2': inputValue * 40468600,
+            'ft2': inputValue * 43560,
+            'mm2': inputValue * 40468564.224 // mm2 추가
+        },
+        'mm2': {
+            'm2': inputValue * 0.000001, // 추가
+            'cm2': inputValue * 0.01, // 추가
+            'ft2': inputValue * 0.0000107639, // 추가
+            'acre': inputValue * 0.000000000247105 // 추가
+        },
+
+        // 무게 단위 변환 부분 추가
+        'kg': {
+            'g': inputValue * 1000,
+            'lb': inputValue * 2.20462,
+            'oz': inputValue * 35.274
+        },
+        'g': {
+            'kg': inputValue * 0.001,
+            'lb': inputValue * 0.00220462,
+            'oz': inputValue * 0.035274
+        },
+        'lb': {
+            'kg': inputValue * 0.453592,
+            'g': inputValue * 453.592,
+            'oz': inputValue * 16
+        },
+        'oz': {
+            'kg': inputValue * 0.0283495,
+            'g': inputValue * 28.3495,
+            'lb': inputValue * 0.0625
+        }
+    };
+
+    outputUnit = unit;
+    const convertedValue = conversions[inputUnit][outputUnit];
+    const formattedValue = parseFloat(convertedValue.toFixed(6)).toString(); // 소수점 이하 6자리까지 반올림하고 문자열로 변환
+    document.getElementById("outputValue").value = formattedValue.includes('.') ? formattedValue.replace(/\.?0*$/, '') : formattedValue; // 숫자가 소수점을 포함하고, 소수점 이하가 0이면 제거
+    document.getElementById("selectedOutputUnit").textContent = unit;
+    // 모든 결과 버튼의 배경색을 초기화
+    const resultBtns = document.querySelectorAll(".result-box button");
+    resultBtns.forEach(btn => {
+        btn.style.backgroundColor = '';
+    });
+    // 해당 결과 버튼만 주황색으로 변경
+    lastClickedResultUnitBtn = document.getElementById(unit + "ResultBtn");
+    if (lastClickedResultUnitBtn) {
+        lastClickedResultUnitBtn.style.backgroundColor = 'orange';
+    }
+}
+
+document.getElementById("inputValue").addEventListener("input", function () {
+    inputValue = parseFloat(this.value);
+    convertTo(outputUnit); // 왼쪽 입력값이 변경될 때마다 결과 업데이트
+});
+
+
+// 계산기 관련 JavaScript 코드
+let expression = '';
+
+document.addEventListener('DOMContentLoaded', function() {
+    let keyboardEnabled = true; // 키보드 이벤트 리스너 상태
+
+    // 키보드 이벤트 리스너 등록
+    document.addEventListener('keydown', function(event) {
+        if (keyboardEnabled) { // 키보드 리스너가 활성화된 경우에만 동작
+            // 숫자키와 소수점만 처리 (0-9, .)
+            if ((event.key >= '0' && event.key <= '9') || event.key === '.') {
+                appendToDisplay(event.key);
+            } else if (event.key === '+' || event.key === '-' || event.key === '*' || event.key === '/' || event.key === '^') {
+                appendToDisplay(event.key);
+            } else if (event.key === 'Enter') {
+                calculateResult();
+            } else if (event.key === 'Backspace') {
+                clearEntry();
+            }
+
+        }
+    });
+
+    // 다른 요소에 포커스가 이동될 때 이벤트 리스너 등록
+    document.addEventListener('focusin', function(event) {
+        // 계산기의 입력 상자에 포커스가 있는지 확인
+        const calculatorInput = document.getElementById('result');
+        if (event.target !== calculatorInput) { // 계산기의 입력 상자에 포커스가 없는 경우
+            keyboardEnabled = false; // 키보드 리스너 비활성화
+        } else {
+            keyboardEnabled = true; // 포커스가 계산기의 입력 상자에 있을 때만 키보드 리스너 활성화
+        }
+    });
+
+    // 페이지 클릭 이벤트 리스너 등록
+    document.addEventListener('click', function(event) {
+        // 포커스가 변경될 때마다 키보드 이벤트 리스너의 상태 확인하여 키패드 활성화
+        const calculatorInput = document.getElementById('result');
+        if (document.activeElement === calculatorInput) {
+            keyboardEnabled = true;
+        }
+    });
+});
+
+
+// 계산기 입력창에 값을 추가하는 함수
+function appendToDisplay(value) {
+    const display = document.getElementById('result');
+    const currentValue = display.value;
+
+    if (value === '%') {
+        try {
+            const result = eval(currentValue + '/100'); // 입력된 값에 100으로 나눈 결과 계산
+            display.value = result; // 결과 표시
+            expression = result.toString(); // expression에 결과를 저장하여 연속 계산 가능하도록 함
+        } catch (error) {
+            alert('Invalid expression!'); // 오류 메시지 표시
+            clearDisplay(); // 입력창 초기화
+        }
+    } else {
+        if (currentValue === '') {
+            // 입력창이 비어있는 경우에는 새로운 값을 입력
+            expression = value;
+        } else {
+            // 이미 값이 있는 경우에는 기존 값 뒤에 새로운 값을 추가
+            expression += value;
+        }
+        // X^2 또는 sqrt2 버튼을 눌렀을 때 이전 값으로 연속해서 계산할 수 있도록 함
+        if (value === 'square') {
+            expression = '(' + currentValue + ')^2';
+        } else if (value === 'sqrt2') {
+            expression = 'sqrt(' + currentValue + ')';
+        }
+    }
+    display.value = expression; // 입력창에 표시
+}
+
+// 계산기 입력창의 값을 제곱하는 함수
+function square() {
+    try {
+        const base = eval(expression); // 입력된 값 저장
+        expression = '(' + base + ')^2'; // 중간 과정 표시
+        const result = base ** 2; // 제곱 계산
+        document.getElementById('result').value = result; // 결과 표시
+        addToHistory(expression + ' = ' + result); // 히스토리에 추가
+        expression = result; // 중간 과정 초기화 후 결과를 새로운 expression으로 설정
+    } catch (error) {
+        alert('Invalid expression!'); // 오류 메시지 표시
+        clearDisplay(); // 입력창 초기화
+    }
+}
+
+// 계산기 입력창의 값을 2로 나눈 제곱근을 계산하는 함수
+function sqrt2() {
+    try {
+        const base = eval(expression); // 입력된 값 저장
+        const result = Math.sqrt(base); // 제곱근 계산
+        expression = 'sqrt(' + base + ')'; // 중간 과정 표시
+        document.getElementById('result').value = result; // 결과 표시
+        addToHistory(expression + ' = ' + result); // 히스토리에 추가
+        expression = result; // 중간 과정 초기화 후 결과를 새로운 expression으로 설정
+    } catch (error) {
+        alert('Invalid expression!'); // 오류 메시지 표시
+        clearDisplay(); // 입력창 초기화
+    }
+}
+
+// X^Y를 계산하는 함수
+function powerXY() {
+    try {
+        const base = eval(expression); // 입력된 값 저장
+        expression = '(' + base + ')**'; // 중간 과정 표시
+        document.getElementById('result').value = expression; // 입력창에 표시
+    } catch (error) {
+        alert('Invalid expression!'); // 오류 메시지 표시
+        clearDisplay(); // 입력창 초기화
+    }
+}
+
+
+// % 버튼을 누를 때의 동작을 정의하는 함수
+function addPercentageToHistory() {
+    const display = document.getElementById('result');
+    const currentValue = display.value;
+
+    try {
+        const result = eval(currentValue + '/100'); // 입력된 값에 100으로 나눈 결과 계산
+        addToHistory(currentValue + '% = ' + result); // 히스토리에 추가
+    } catch (error) {
+        alert('Invalid expression!'); // 오류 메시지 표시
+        clearDisplay(); // 입력창 초기화
+    }
+}
+
+// 계산 결과를 계산기 입력창에 표시하고 히스토리에 추가하는 함수
+function calculateResult() {
+    try {
+        let result = eval(expression); // 계산 결과 계산
+        const historyElement = document.getElementById('history');
+        const expressionToDisplay = expression + ' = ' + result; // 계산식과 결과를 합쳐서 표시
+        expression = ''; // 계산식 초기화
+        document.getElementById('result').value = result; // 결과 표시
+        if (historyElement.innerHTML !== '') {
+            historyElement.innerHTML += '<br>';
+        }
+        historyElement.innerHTML += expressionToDisplay; // 히스토리에 추가
+        expression = result.toString(); // 계산 결과를 다시 expression에 할당하여 연속 계산 가능하도록 함
+    } catch (error) {
+        alert('Invalid expression!'); // 오류 메시지 표시
+        clearDisplay(); // 입력창 초기화
+    }
+}
+
+
+// 계산기 입력창을 지우는 함수
+function clearDisplay() {
+    expression = ''; // 식 초기화
+    document.getElementById('result').value = ''; // 입력창 지우기
+}
+
+// 계산기 입력창의 마지막 문자를 지우는 함수
+function clearEntry() {
+    expression = expression.slice(0, -1); // 마지막 문자 제거
+    document.getElementById('result').value = expression; // 입력창 갱신
+}
+
+// 계산기 입력창의 값에 1을 더하는 함수
+function reciprocal() {
+    try {
+        const result = eval('1 / (' + expression + ')'); // 1을 입력된 값으로 나눈 결과 계산
+        document.getElementById('result').value = result; // 결과 표시
+        addToHistory('1 / (' + expression + ') = ' + result); // 히스토리에 추가
+        expression = result.toString(); // expression에 결과를 저장하여 연속 계산 가능하도록 함
+    } catch (error) {
+        alert('Invalid expression!'); // 오류 메시지 표시
+        clearDisplay(); // 입력창 초기화
+    }
+}
+
+// 계산기 입력창의 마지막 문자를 지우는 함수
+function backspace() {
+    expression = expression.substring(0, expression.length - 1); // 마지막 문자 제거
+    document.getElementById('result').value = expression; // 입력창 갱신
+}
+
+// 계산기 입력창을 초기화하는 함수
+function clearDisplay() {
+    expression = '';
+    document.getElementById('result').value = '';
+}
+
+// 계산기 입력창의 마지막 항목을 삭제하는 함수 (CE 버튼 기능)
+function clearEntry() {
+    expression = expression.slice(0, -1);
+    document.getElementById('result').value = expression;
+}
+
+// 계산기의 히스토리에 계산식과 결과를 추가하는 함수
+function addToHistory(entry) {
+    const historyElement = document.getElementById('history');
+    if (historyElement.innerHTML !== '') {
+        historyElement.innerHTML += '<br>';
+    }
+    historyElement.innerHTML += entry;
+}
+
+
+
+
+
+<!--// textarea의 높이를 자동으로 조절하는 함수-->
+<!--function autoResizeTextarea(event) {-->
+<!--    const textarea = event.target;-->
+<!--    textarea.style.height = 'auto';-->
+<!--    textarea.style.height = textarea.scrollHeight + 'px';-->
+<!--}-->
+
+<!--// 페이지 로드 시 textarea의 높이를 자동으로 조절-->
+<!--window.addEventListener('load', function() {-->
+<!--    const textareas = document.querySelectorAll('textarea');-->
+<!--    textareas.forEach(textarea => {-->
+<!--        textarea.style.height = '200px'; // 초기 높이 설정-->
+<!--    });-->
+<!--});-->
+
+<!--// textarea에 입력할 때마다 높이를 자동으로 조절-->
+<!--document.addEventListener('input', function(event) {-->
+<!--    if (event.target.tagName.toLowerCase() === 'textarea') {-->
+<!--        autoResizeTextarea(event);-->
+<!--    }-->
+<!--});-->
+
+<!--// 엔터 키를 누를 때마다 textarea의 높이를 자동으로 조절-->
+<!--document.addEventListener('keydown', function(event) {-->
+<!--    if (event.key === 'Enter' && event.target.tagName.toLowerCase() === 'textarea') {-->
+<!--        autoResizeTextarea(event);-->
+<!--    }-->
+<!--});-->
+
+</script>
+
+{% endblock %}
