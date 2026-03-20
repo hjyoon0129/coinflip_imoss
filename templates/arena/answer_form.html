@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+  .arena-answer-form-wrap{
+    max-width: 860px;
+    margin: 24px auto;
+  }
+
+  .arena-answer-card{
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 24px;
+    background: rgba(255,255,255,.02);
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  }
+
+  .arena-answer-title{
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
+
+  .arena-answer-sub{
+    color: #6c757d;
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+
+  .arena-answer-card .form-label{
+    font-weight: 700;
+  }
+
+  .arena-answer-card .form-control{
+    border-radius: 12px;
+  }
+
+  .arena-answer-card textarea.form-control{
+    min-height: 220px;
+    resize: vertical;
+  }
+
+  .arena-answer-error{
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+  }
+
+  .arena-answer-actions{
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+
+  .arena-answer-hint{
+    margin-top: 8px;
+    color: #6c757d;
+    font-size: 13px;
+  }
+
+  @media (max-width: 768px){
+    .arena-answer-form-wrap{
+      margin: 16px auto;
+    }
+
+    .arena-answer-card{
+      padding: 16px;
+      border-radius: 14px;
+    }
+
+    .arena-answer-title{
+      font-size: 20px;
+    }
+
+    .arena-answer-card textarea.form-control{
+      min-height: 180px;
+    }
+  }
+</style>
+
+<div class="container arena-answer-form-wrap">
+  <div class="arena-answer-card">
+    <h5 class="border-bottom pb-2 mb-2 arena-answer-title">Edit Answer</h5>
+    <div class="arena-answer-sub">
+      Update your answer clearly so other players can understand it better.
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      {% if form.errors %}
+      <div class="alert alert-danger arena-answer-error" role="alert">
+        <strong>Please check the field below.</strong>
+        <div class="mt-2">
+          {% for field in form %}
+            {% if field.errors %}
+              <div class="mb-1">
+                <strong>{{ field.label }}</strong> {{ field.errors }}
+              </div>
+            {% endif %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <div class="mb-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="mb-3">
+        <label for="content" class="form-label">Answer</label>
+        <textarea
+          class="form-control"
+          name="content"
+          id="content"
+          rows="10"
+          placeholder="Update your answer here">{{ form.content.value|default_if_none:'' }}</textarea>
+        <div class="arena-answer-hint">
+          A clear and specific answer is more likely to receive recommendations.
+        </div>
+      </div>
+
+      <div class="arena-answer-actions">
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,213 +1,433 @@
 {% load static %}
 
 <style>
-    .navbar-dark .navbar-nav .nav-link.logout-btn {
-        background-color: #FFC107;
-        font-weight: bold;
-        color: black !important;
-        border: none;
-        border-radius: 6px;
-        padding: 8px 14px;
-        line-height: 1.2;
-        display: inline-block;
-        text-decoration: none;
+  .yc-navbar{
+    background:
+      linear-gradient(180deg, rgba(8,12,24,.96), rgba(10,15,30,.92));
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  }
+
+  .yc-navbar .container-fluid{
+    max-width: 1320px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .yc-brand{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    min-width: 0;
+  }
+
+  .yc-logo{
+    position: relative;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,.36), transparent 34%),
+      linear-gradient(145deg, rgba(255,210,90,.28), rgba(126,87,194,.18) 58%, rgba(20,26,50,.95));
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.03) inset,
+      0 8px 24px rgba(0,0,0,.32),
+      0 0 18px rgba(255,193,7,.12);
+    overflow: hidden;
+    flex: 0 0 42px;
+    transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  }
+
+  .yc-logo::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.18), transparent 38%),
+      linear-gradient(135deg, rgba(255,255,255,.06), transparent 55%);
+    pointer-events:none;
+  }
+
+  .yc-logo::after{
+    content:"";
+    position:absolute;
+    right:-8px;
+    top:-8px;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    background: radial-gradient(circle, rgba(255,240,180,.52), rgba(255,193,7,0));
+    filter: blur(2px);
+    pointer-events:none;
+  }
+
+  .yc-y{
+    position:absolute;
+    inset:0;
+  }
+
+  .yc-y .arm-left,
+  .yc-y .arm-right,
+  .yc-y .stem{
+    position:absolute;
+    background: linear-gradient(180deg, #fff4c4 0%, #ffd95c 42%, #ffbf00 100%);
+    box-shadow:
+      0 0 10px rgba(255,214,92,.24),
+      0 0 20px rgba(255,193,7,.16);
+  }
+
+  .yc-y .arm-left{
+    width: 8px;
+    height: 18px;
+    left: 10px;
+    top: 8px;
+    border-radius: 999px;
+    transform: rotate(35deg);
+    transform-origin: center;
+  }
+
+  .yc-y .arm-right{
+    width: 8px;
+    height: 18px;
+    right: 10px;
+    top: 8px;
+    border-radius: 999px;
+    transform: rotate(-35deg);
+    transform-origin: center;
+  }
+
+  .yc-y .stem{
+    width: 8px;
+    height: 18px;
+    left: 50%;
+    top: 18px;
+    transform: translateX(-50%);
+    border-radius: 999px;
+  }
+
+  .yc-brand:hover .yc-logo{
+    transform: translateY(-1px) scale(1.03);
+    border-color: rgba(255,213,79,.34);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.04) inset,
+      0 14px 30px rgba(0,0,0,.38),
+      0 0 24px rgba(255,213,79,.22);
+  }
+
+  .yc-brand-text{
+    display:flex;
+    flex-direction:column;
+    line-height:1.02;
+    min-width:0;
+  }
+
+  .yc-brand-title{
+    font-size: 1.02rem;
+    font-weight: 800;
+    letter-spacing: .8px;
+    color: #ffffff;
+    text-transform: uppercase;
+    text-shadow: 0 0 14px rgba(255,255,255,.08);
+  }
+
+  .yc-brand-sub{
+    margin-top: 2px;
+    font-size: .68rem;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #ffcf57;
+    opacity: .92;
+  }
+
+  .yc-toggler{
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 12px;
+    padding: 6px 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.16);
+  }
+
+  .yc-toggler:focus{
+    box-shadow: 0 0 0 .18rem rgba(255,193,7,.18);
+  }
+
+  .yc-navbar .navbar-nav{
+    gap: 8px;
+    align-items: center;
+  }
+
+  .yc-left-menu,
+  .yc-right-menu{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .yc-left-menu{
+    margin-left: 18px;
+  }
+
+  .yc-right-menu{
+    margin-left: auto;
+  }
+
+  .yc-link{
+    position: relative;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap: 8px;
+    padding: 9px 14px !important;
+    border-radius: 12px;
+    color: rgba(255,255,255,.88) !important;
+    font-weight: 700;
+    text-decoration:none;
+    transition:
+      color .18s ease,
+      background-color .18s ease,
+      box-shadow .18s ease,
+      transform .18s ease,
+      border-color .18s ease;
+    border: 1px solid transparent;
+  }
+
+  .yc-link:hover{
+    color: #fff !important;
+    background: rgba(255,255,255,.06);
+    border-color: rgba(255,255,255,.08);
+    transform: translateY(-1px);
+  }
+
+  .yc-link.active{
+    background:
+      linear-gradient(135deg, rgba(126,87,194,.18), rgba(255,193,7,.14));
+    color: #ffd95c !important;
+    border-color: rgba(255,213,79,.26);
+    box-shadow: 0 0 18px rgba(255,213,79,.08);
+  }
+
+  .yc-link.active::after{
+    content:"";
+    position:absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 6px;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(255,193,7,0), rgba(255,213,79,.95), rgba(255,193,7,0));
+  }
+
+  .yc-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding: 9px 14px !important;
+    border-radius: 12px;
+    font-weight: 800;
+    text-decoration:none;
+    border: 1px solid transparent;
+    transition:
+      transform .18s ease,
+      box-shadow .18s ease,
+      background-color .18s ease,
+      border-color .18s ease;
+  }
+
+  .yc-btn:hover{
+    transform: translateY(-1px);
+  }
+
+  .yc-btn-google{
+    background: linear-gradient(180deg, #ffffff, #f2f2f2);
+    color: #161616 !important;
+    border-color: rgba(255,255,255,.2);
+    box-shadow: 0 8px 18px rgba(0,0,0,.14);
+  }
+
+  .yc-btn-google:hover{
+    background: linear-gradient(180deg, #ffffff, #ececec);
+    color: #111 !important;
+  }
+
+  .yc-btn-outline{
+    color: #fff !important;
+    border-color: rgba(255,255,255,.18);
+    background: rgba(255,255,255,.03);
+  }
+
+  .yc-btn-outline:hover{
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.26);
+  }
+
+  .yc-btn-logout{
+    color: #161616 !important;
+    background: linear-gradient(180deg, #ffd95c, #ffbf00);
+    border-color: rgba(255,213,79,.42);
+    box-shadow:
+      0 10px 20px rgba(0,0,0,.16),
+      0 0 16px rgba(255,193,7,.14);
+  }
+
+  .yc-btn-logout:hover{
+    box-shadow:
+      0 12px 22px rgba(0,0,0,.20),
+      0 0 20px rgba(255,193,7,.22);
+  }
+
+  .yc-user-text{
+    max-width: 230px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .yc-google-icon{
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+  }
+
+  .yc-logout-form{
+    margin:0;
+  }
+
+  .yc-logout-form button{
+    cursor:pointer;
+  }
+
+  @media (max-width: 991.98px){
+    .yc-navbar .container-fluid{
+      padding-left: 12px;
+      padding-right: 12px;
     }
 
-    .navbar-dark .navbar-nav .nav-link.google-btn {
-        background-color: #ffffff;
-        color: #222 !important;
-        border: 1px solid rgba(255,255,255,0.25);
-        border-radius: 6px;
-        padding: 8px 14px;
-        line-height: 1.2;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        text-decoration: none;
-        font-weight: 600;
+    .yc-navbar .navbar-nav{
+      width:100%;
+      padding-top: 12px;
+      padding-bottom: 8px;
+      align-items: stretch;
+      gap: 10px;
     }
 
-    .navbar-dark .navbar-nav .nav-link.google-btn:hover {
-        background-color: #f3f3f3;
-        color: #111 !important;
+    .yc-left-menu,
+    .yc-right-menu{
+      width:100%;
+      margin-left: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
     }
 
-    .navbar-dark .navbar-nav .nav-link.signup-btn {
-        background-color: transparent;
-        color: #fff !important;
-        border: 1px solid rgba(255,255,255,0.25);
-        border-radius: 6px;
-        padding: 8px 14px;
-        line-height: 1.2;
-        display: inline-block;
-        text-decoration: none;
-        font-weight: 500;
+    .yc-left-menu li,
+    .yc-right-menu li{
+      width:100%;
+      list-style:none;
     }
 
-    .navbar-dark .navbar-nav .nav-link.signup-btn:hover {
-        background-color: rgba(255,255,255,0.08);
+    .yc-link,
+    .yc-btn{
+      width:100%;
+      justify-content:center;
+      text-align:center;
     }
 
-    .navbar-nav {
-        padding: 8px 12px;
-        gap: 8px;
-        align-items: center;
+    .yc-logout-form{
+      width:100%;
     }
 
-    .navbar-nav li {
-        list-style: none;
+    .yc-logout-form button{
+      width:100%;
     }
 
-    .navbar-nav li:hover {
-        background-color: grey;
-        border-radius: 4px;
+    .yc-brand-title{
+      font-size: .96rem;
     }
 
-    .navbar-brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        white-space: nowrap;
-        text-decoration: none;
+    .yc-brand-sub{
+      font-size: .64rem;
+      letter-spacing: 1px;
     }
-
-    .brand-text-wrap {
-        display: flex;
-        flex-direction: column;
-        line-height: 1.1;
-    }
-
-    .brand-main-text {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #fff;
-    }
-
-    .impossible-text {
-        color: #FFA500;
-        font-weight: normal;
-        font-size: 0.78em;
-        margin-top: 2px;
-        display: block;
-    }
-
-    .logout-form {
-        margin: 0;
-    }
-
-    .logout-form button {
-        cursor: pointer;
-    }
-
-    .google-icon {
-        width: 18px;
-        height: 18px;
-        flex: 0 0 18px;
-    }
-
-    @media screen and (max-width: 991.98px) {
-        .navbar-nav {
-            display: flex;
-            padding: 12px 0;
-            text-align: left;
-            width: 100%;
-            gap: 10px;
-        }
-
-        .navbar-nav li {
-            width: 100%;
-        }
-
-        .navbar-nav li:hover {
-            background-color: grey;
-            border-radius: 4px;
-            width: 100%;
-        }
-
-        .navbar-dark .navbar-nav .nav-link.google-btn,
-        .navbar-dark .navbar-nav .nav-link.signup-btn,
-        .navbar-dark .navbar-nav .nav-link.logout-btn {
-            width: 100%;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .logout-form {
-            width: 100%;
-        }
-
-        .logout-form button {
-            width: 100%;
-        }
-
-        .navbar-brand {
-            max-width: calc(100% - 60px);
-        }
-
-        .brand-main-text {
-            font-size: 0.95rem;
-        }
-
-        .impossible-text {
-            font-size: 0.72em;
-        }
-    }
+  }
 </style>
 
-<script src="https://kit.fontawesome.com/ccb1843f6b.js" crossorigin="anonymous"></script>
+<nav class="navbar navbar-expand-lg navbar-dark yc-navbar">
+  <div class="container-fluid">
+    <a class="navbar-brand yc-brand" href="{% url 'main:home' %}">
+      <span class="yc-logo" aria-hidden="true">
+        <span class="yc-y">
+          <span class="arm-left"></span>
+          <span class="arm-right"></span>
+          <span class="stem"></span>
+        </span>
+      </span>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'main:home' %}">
-            <img src="{% static 'question_images/pyconverter_logo.png' %}" alt="PyConverter 로고" style="width: 30px; height: 30px; object-fit: contain;">
-            <span class="brand-text-wrap">
-                <span class="brand-main-text">PyConverter</span>
-                <span class="impossible-text">Impossible is Nothing</span>
-            </span>
-        </a>
+      <span class="yc-brand-text">
+        <span class="yc-brand-title">YOONCOIN</span>
+        <span class="yc-brand-sub">Risk. Discipline. Growth.</span>
+      </span>
+    </a>
 
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent"
-                aria-expanded="false"
-                aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+    <button class="navbar-toggler yc-toggler" type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
-            <ul class="navbar-nav mb-2 mb-lg-0">
-
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <form action="{% url 'account_logout' %}" method="post" class="logout-form">
-                            {% csrf_token %}
-                            <button type="submit" class="nav-link logout-btn">
-                                {{ user.username|default:user.email }} (Log out)
-                            </button>
-                        </form>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link google-btn" href="/accounts/google/login/">
-                            <svg class="google-icon" viewBox="0 0 48 48" aria-hidden="true">
-                                <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/>
-                                <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
-                                <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.2-8l-6.5 5C9.6 39.5 16.3 44 24 44z"/>
-                                <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.1 3.1-3.3 5.6-6.3 7.1l6.3 5.2C39.2 36.7 44 31 44 24c0-1.3-.1-2.4-.4-3.5z"/>
-                            </svg>
-                            Sign in with Google
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link signup-btn" href="/accounts/google/login/">
-                            Sign up
-                        </a>
-                    </li>
-                {% endif %}
-            </ul>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav w-100 mb-2 mb-lg-0">
+        <div class="yc-left-menu">
+          <li class="nav-item">
+            <a class="nav-link yc-link {% if '/arena/' in request.path %}active{% endif %}"
+               href="{% url 'arena:index' %}">
+              <i class="fas fa-trophy"></i>
+              <span>Arena</span>
+            </a>
+          </li>
         </div>
+
+        <div class="yc-right-menu">
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <form action="{% url 'account_logout' %}" method="post" class="yc-logout-form">
+                {% csrf_token %}
+                <button type="submit" class="nav-link yc-btn yc-btn-logout border-0">
+                  <i class="fas fa-user-circle"></i>
+                  <span class="yc-user-text">{{ user.username|default:user.email }}</span>
+                  <span>Log out</span>
+                </button>
+              </form>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link yc-btn yc-btn-google"
+                 href="/accounts/google/login/">
+                <svg class="yc-google-icon" viewBox="0 0 48 48" aria-hidden="true">
+                  <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/>
+                  <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+                  <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.2-8l-6.5 5C9.6 39.5 16.3 44 24 44z"/>
+                  <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.1 3.1-3.3 5.6-6.3 7.1l6.3 5.2C39.2 36.7 44 31 44 24c0-1.3-.1-2.4-.4-3.5z"/>
+                </svg>
+                <span>Sign in with Google</span>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link yc-btn yc-btn-outline"
+                 href="/accounts/google/login/">
+                <i class="fas fa-bolt"></i>
+                <span>Start Now</span>
+              </a>
+            </li>
+          {% endif %}
+        </div>
+      </ul>
     </div>
+  </div>
 </nav>

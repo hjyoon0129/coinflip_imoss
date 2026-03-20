@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+  .arena-form-wrap{
+    max-width: 880px;
+    margin: 24px auto;
+  }
+
+  .arena-form-card{
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 24px;
+    background: rgba(255,255,255,.02);
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  }
+
+  .arena-form-title{
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
+
+  .arena-form-sub{
+    color: #6c757d;
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+
+  .arena-form-card .form-label{
+    font-weight: 700;
+  }
+
+  .arena-form-card .form-control{
+    border-radius: 12px;
+  }
+
+  .arena-form-card textarea.form-control{
+    min-height: 240px;
+    resize: vertical;
+  }
+
+  .arena-error-box{
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+  }
+
+  .image-preview-wrap{
+    margin-top: 12px;
+    display: none;
+  }
+
+  .image-preview{
+    max-width: 260px;
+    max-height: 260px;
+    border-radius: 14px;
+    border: 1px solid rgba(0,0,0,.08);
+    object-fit: cover;
+  }
+
+  .arena-form-actions{
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+
+  .arena-hint{
+    margin-top: 8px;
+    color: #6c757d;
+    font-size: 13px;
+  }
+
+  @media (max-width: 768px){
+    .arena-form-wrap{
+      margin: 16px auto;
+    }
+
+    .arena-form-card{
+      padding: 16px;
+      border-radius: 14px;
+    }
+
+    .arena-form-title{
+      font-size: 20px;
+    }
+
+    .arena-form-card textarea.form-control{
+      min-height: 200px;
+    }
+
+    .image-preview{
+      max-width: 100%;
+      max-height: 220px;
+    }
+  }
+</style>
+
+<div class="container arena-form-wrap">
+  <div class="arena-form-card">
+    <h5 class="border-bottom pb-2 mb-2 arena-form-title">
+      {% if question %}
+        Edit Post
+      {% else %}
+        Write Post
+      {% endif %}
+    </h5>
+
+    <div class="arena-form-sub">
+      Share your strategy, feedback, or results with the Arena community.
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      {% if form.errors %}
+      <div class="alert alert-danger arena-error-box" role="alert">
+        <strong>Please check the fields below.</strong>
+        <div class="mt-2">
+          {% for field in form %}
+            {% if field.errors %}
+              <div class="mb-1">
+                <strong>{{ field.label }}</strong> {{ field.errors }}
+              </div>
+            {% endif %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <div class="mb-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="mb-3">
+        <label for="subject" class="form-label">Title</label>
+        <input
+          type="text"
+          class="form-control"
+          name="subject"
+          id="subject"
+          placeholder="Enter your post title"
+          value="{{ form.subject.value|default_if_none:'' }}">
+      </div>
+
+      <div class="mb-3">
+        <label for="content" class="form-label">Content</label>
+        <textarea
+          class="form-control"
+          name="content"
+          id="content"
+          rows="10"
+          placeholder="Write your post here">{{ form.content.value|default_if_none:'' }}</textarea>
+        <div class="arena-hint">
+          Posts with clear details tend to get more replies and votes.
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="image" class="form-label">Image</label>
+        <input
+          type="file"
+          class="form-control"
+          name="image"
+          id="image"
+          accept="image/*">
+        <div class="arena-hint">
+          You can upload a screenshot, chart, or result image.
+        </div>
+
+        <div id="imagePreviewWrap" class="image-preview-wrap">
+          <img id="imagePreview" class="image-preview" alt="Preview">
+        </div>
+
+        {% if question and question.image %}
+        <div class="mt-3">
+          <div class="arena-hint mb-2">Current image</div>
+          <img src="{{ question.image.url }}" class="image-preview" alt="Current image">
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="arena-form-actions">
+        <button type="submit" class="btn btn-primary">
+          {% if question %}
+            Update
+          {% else %}
+            Publish
+          {% endif %}
+        </button>
+
+        <a href="{% url 'arena:index' %}" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+  (function () {
+    const imageInput = document.getElementById('image');
+    const previewWrap = document.getElementById('imagePreviewWrap');
+    const previewImg = document.getElementById('imagePreview');
+
+    if (!imageInput || !previewWrap || !previewImg) return;
+
+    imageInput.addEventListener('change', function (event) {
+      const file = event.target.files && event.target.files[0];
+
+      if (!file) {
+        previewWrap.style.display = 'none';
+        previewImg.removeAttribute('src');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        previewImg.src = e.target.result;
+        previewWrap.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+  })();
+</script>
+{% endblock %}

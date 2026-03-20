@@ -1,92 +1,189 @@
 {% load static %}
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
     <meta name="naver-site-verification" content="743c03de66f707b24a8420f48386c5b170c58219" />
     <meta name="google-site-verification" content="Fh1shrN17qbSjjBzL_enci2xFezGpGah2gQNXx1o8YQ" />
 
-    <meta name="title" content="Pyconverter">
-    <meta name="subject" content="Unit converter description: Length, Volume, Area, and Weight converter">
-    <meta name="keywords" content="miles to km, cm to inches, lbs to kg, inch to cm, cm to inch, pyconverter, kg to lbs, inches to cm, converter, mm to inches, mm to m, cm to feet, mm to cm, inch to mm, mile to km, feet to cm, km to miles, lb to kg, cm to m, cm to in, inches to feet, mm to inch, gallon to liter, mm to in, m to mm, inch to feet, inches to mm, unit conversion, meters to feet, conversion calculator, length converter, convert cm to inch">
-    <meta name="description" content="miles to km, cm to inches, lbs to kg, inch to cm, cm to inch, pyconverter, kg to lbs, inches to cm, converter, mm to inches, mm to m, cm to feet, mm to cm, inch to mm, mile to km, feet to cm, km to miles, lb to kg, cm to m, cm to in, inches to feet, mm to inch, gallon to liter, mm to in, m to mm, inch to feet, inches to mm, unit conversion, meters to feet, conversion calculator, length converter, convert cm to inch">
-    <meta name="author" content="Pyconverter">
-    <meta property="og:url" content="https://pyconverter.com" />
+    <meta name="title" content="YOONCOIN">
+    <meta name="subject" content="YOONCOIN leverage training game and strategy arena">
+    <meta name="keywords" content="yooncoin, coin flip, leverage trainer, kelly trainer, crypto game, trading simulator, arena board, strategy board, leverage game, capital training, trading practice">
+    <meta name="description" content="YOONCOIN is a leverage training game and strategy arena where players can practice capital management, improve decision-making, and compete through tier-based gameplay.">
+    <meta name="author" content="YOONCOIN">
+
+    <meta property="og:url" content="https://yooncoin.com" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Pyconverter" />
-    <meta property="og:description" content="Free online unit converter for length, volume, area, weight, and more" />
+    <meta property="og:title" content="YOONCOIN" />
+    <meta property="og:description" content="Leverage training game and Arena community for strategy, rankings, and tier progression." />
+    <meta property="og:site_name" content="YOONCOIN" />
+
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
-<!--    <meta property="og:image" content="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fk.kakaocdn.net%2Fdn%2Fc0eq42%2FbtqCQpiFhFn%2F8KPaOP9q8PXpJFRL7if55K%2Fimg.jpg" />-->
-<!--    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">-->
-<!--    <link rel="icon" href="/favicon.ico" type="image/x-icon">-->
-
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" type="text/css" href="{% static 'bootstrap.min.css' %}">
-
-    <!-- head 부분에 추가 -->
     <script src="https://kit.fontawesome.com/2b2d3311be.js" crossorigin="anonymous"></script>
 
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5198100418909507"
-     crossorigin="anonymous"></script>
+    <title>YOONCOIN</title>
 
-    <title>Hello, pyconverter!</title>
+    <style>
+        :root{
+            --site-bg: #060b16;
+            --site-bg-2: #0a1120;
+            --site-panel: #0f1728;
+            --site-panel-2: #121d34;
+            --site-line: rgba(255,255,255,.08);
+            --site-line-strong: rgba(255,255,255,.14);
+            --site-text: #eef4ff;
+            --site-text-soft: #c5d2ee;
+            --site-muted: #8c9bbc;
+            --site-accent: #3f74ff;
+            --site-gold: #ffcc4d;
+            --site-shadow: 0 24px 60px rgba(0,0,0,.45);
+        }
+
+        html, body{
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+            background:
+                radial-gradient(circle at top left, rgba(72,104,255,.10), transparent 20%),
+                radial-gradient(circle at top right, rgba(255,204,77,.06), transparent 14%),
+                linear-gradient(180deg, var(--site-bg-2) 0%, var(--site-bg) 100%);
+            color: var(--site-text);
+        }
+
+        body{
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+        }
+
+        a{
+            text-decoration: none;
+        }
+
+        .site-main{
+            min-height: calc(100vh - 76px);
+            padding: 28px 0 40px;
+        }
+
+        .site-container{
+            width: 100%;
+            max-width: 1380px;
+            margin: 0 auto;
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+
+        .site-content{
+            width: 100%;
+        }
+
+        .messages-wrap{
+            margin-bottom: 18px;
+        }
+
+        .site-alert{
+            border-radius: 16px;
+            border: 1px solid var(--site-line);
+            background: rgba(255,255,255,.04);
+            color: var(--site-text);
+            box-shadow: 0 12px 26px rgba(0,0,0,.18);
+        }
+
+        .alert-success.site-alert{
+            background: linear-gradient(180deg, rgba(31,101,71,.30), rgba(20,74,52,.20));
+            border-color: rgba(79,209,140,.20);
+            color: #d7ffe8;
+        }
+
+        .alert-danger.site-alert{
+            background: linear-gradient(180deg, rgba(120,34,49,.28), rgba(86,24,35,.18));
+            border-color: rgba(255,107,129,.20);
+            color: #ffd8de;
+        }
+
+        .alert-warning.site-alert{
+            background: linear-gradient(180deg, rgba(132,94,24,.28), rgba(98,68,18,.18));
+            border-color: rgba(255,204,77,.20);
+            color: #fff1c7;
+        }
+
+        .alert-info.site-alert{
+            background: linear-gradient(180deg, rgba(34,73,132,.28), rgba(24,52,96,.18));
+            border-color: rgba(108,160,255,.18);
+            color: #dbe8ff;
+        }
+
+        .page-block{
+            width: 100%;
+        }
+
+        footer.site-footer-space{
+            height: 12px;
+        }
+
+        @media (max-width: 991.98px){
+            .site-main{
+                padding-top: 18px;
+                padding-bottom: 28px;
+            }
+
+            .site-container{
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+        }
+
+        @media (max-width: 575.98px){
+            .site-main{
+                padding-top: 14px;
+                padding-bottom: 22px;
+            }
+
+            .site-container{
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .messages-wrap{
+                margin-bottom: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- 네비게이션바 -->
     {% include "navbar.html" %}
 
- <div class="container mt-3" style="height: auto !important;">
-    <div class="row" style="height: auto !important;">
+    <main class="site-main">
+        <div class="site-container">
+            <div class="site-content">
 
-    <div class="container-fluid">
-        <div class="row">
-            <!-- 사이드바 -->
+                {% if messages %}
+                    <div class="messages-wrap">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags|default:'info' }} site-alert mb-2" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
-            <div class="col-md-2">
-                {% include "sidebar.html" %}
-
-            </div>
-
-            <!-- 메인 콘텐츠 영역 -->
-            <div class="col-md-9">
-                {% block content %}
-                {% endblock %}
+                <div class="page-block">
+                    {% block content %}
+                    {% endblock %}
+                </div>
             </div>
         </div>
-    </div>
-    </div>
-</div>
-    <!-- Bootstrap JS -->
+    </main>
+
+    <footer class="site-footer-space"></footer>
+
     <script src="{% static 'bootstrap.min.js' %}"></script>
 
-    <!-- 자바스크립트 -->
     {% block script %}
-
-<style>
-.sidebar {
-    width: 200px; /* 사이드바 너비 */
-    background-color: #f4f4f4; /* 사이드바 배경색 */
-    height: 100%; /* 화면 전체 높이 */
-    padding: 20px;
-    box-sizing: border-box;
-    position: fixed; /* 사이드바를 고정 */
-    top: 0;
-    left: 0;
-    overflow-y: auto; /* 내용이 길어질 경우 스크롤바 표시 */
-}
-@media (max-width: 768px) {
-    .visitor {
-        order: 3; /* visitor.html의 순서를 변경하여 맨 아래로 이동시킵니다. */
-    }
-}
-
-
-</style>
-{% endblock %}
-
-
+    {% endblock %}
+</body>
+</html>

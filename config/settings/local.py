@@ -29,23 +29,9 @@ if DEBUG and not ALLOWED_HOSTS:
 
 
 INSTALLED_APPS = [
-    'update.apps.UpdateConfig',
-    'poketmoncard.apps.PoketmoncardConfig',
-    'pikmin.apps.PikminConfig',
-    'editpdf.apps.EditpdfConfig',
-    # 'facehair.apps.FacehairConfig',
-    'spilitpdf.apps.SpilitpdfConfig',
-    'mergepdf.apps.MergepdfConfig',
-    'pdf.apps.PdfConfig',
-    'qna.apps.QnaConfig',
-    'visitor.apps.VisitorConfig',
-    'humor.apps.HumorConfig',
+    'arena.apps.ArenaConfig',
     'main.apps.MainConfig',
-    'boardb.apps.BoardbConfig',
-    'boarda.apps.BoardaConfig',
     'common.apps.CommonConfig',
-    'pyxel.apps.PyxelConfig',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

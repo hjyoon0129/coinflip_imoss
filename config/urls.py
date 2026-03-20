@@ -13,19 +13,8 @@ urlpatterns = [
     path("", include("main.urls")),
 
     # tools / apps
-    path("update/", include("update.urls")),
-    path("poketmoncard/", include("poketmoncard.urls")),
-    path("pikmin/", include("pikmin.urls")),
-    path("editpdf/", include("editpdf.urls")),
-    path("spilitpdf/", include("spilitpdf.urls")),
-    path("mergepdf/", include("mergepdf.urls")),
-    path("pdf/", include("pdf.urls")),
-    path("qna/", include("qna.urls")),
-    path("humor/", include("humor.urls")),
-    path("boardb/", include("boardb.urls")),
-    path("boarda/", include("boarda.urls")),
+    path("arena/", include("arena.urls")),
     path("common/", include("common.urls")),
-    path("pyxel/", include("pyxel.urls")),
     path("user/", include("user.urls")),
 ]
 

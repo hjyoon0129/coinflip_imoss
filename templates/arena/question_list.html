@@ -1,0 +1,1230 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  :root{
+    --arena-bg-1:#050b17;
+    --arena-bg-2:#091223;
+    --arena-panel:#0c1629;
+    --arena-panel-2:#101b31;
+    --arena-line:rgba(255,255,255,.05);
+    --arena-line-strong:rgba(255,255,255,.10);
+    --arena-text:#eef4ff;
+    --arena-text-soft:#c8d4ee;
+    --arena-muted:#8c9cbe;
+
+    --bronze-1:#f0c18a;
+    --bronze-2:#9a6636;
+
+    --silver-1:#eef3fb;
+    --silver-2:#97a3b5;
+
+    --gold-1:#fff1ba;
+    --gold-2:#d8a847;
+
+    --platinum-1:#dfffff;
+    --platinum-2:#61c3cf;
+
+    --diamond-1:#eef7ff;
+    --diamond-2:#67a7ff;
+
+    --master-1:#ffd7ff;
+    --master-2:#b15cff;
+
+    --challenger-1:#fff0b8;
+    --challenger-2:#a66bff;
+
+    --bronze-glow:#d38a42;
+    --silver-glow:#d9e4ff;
+    --gold-glow:#ffd86a;
+    --platinum-glow:#76fff3;
+    --diamond-glow:#6eb8ff;
+    --master-glow:#c56cff;
+    --challenger-glow-1:#ffd86a;
+    --challenger-glow-2:#66b8ff;
+
+    --arena-red:#ff728f;
+    --arena-shadow:0 18px 46px rgba(0,0,0,.30);
+  }
+
+  .arena-board-wrap{
+    width:100%;
+    color:var(--arena-text);
+  }
+
+  .arena-shell{
+    position:relative;
+    background:
+      radial-gradient(circle at top left, rgba(87,110,200,.10), transparent 24%),
+      radial-gradient(circle at top right, rgba(240,213,157,.04), transparent 14%),
+      linear-gradient(180deg, rgba(10,18,35,.98), rgba(4,10,19,.99));
+    border:1px solid rgba(255,255,255,.04);
+    border-radius:30px;
+    padding:24px;
+    box-shadow:var(--arena-shadow);
+    overflow:hidden;
+  }
+
+  .arena-shell::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(255,255,255,.03), transparent 14%);
+    pointer-events:none;
+  }
+
+  .arena-title{
+    margin:0 0 18px 0;
+    padding-bottom:12px;
+    border-bottom:1px solid var(--arena-line);
+    font-size:19px;
+    font-weight:600;
+    color:#f6f8ff;
+    letter-spacing:.05px;
+  }
+
+  .arena-toolbar{
+    margin-bottom:18px;
+  }
+
+  .sort-group{
+    width:100%;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.05);
+    border-radius:18px;
+    overflow:hidden;
+  }
+
+  .sort-group .btn{
+    min-width:48px;
+    height:48px;
+    border:0 !important;
+    border-right:1px solid rgba(255,255,255,.06) !important;
+    background:transparent;
+    color:#cad6f1;
+    font-weight:500;
+    transition:all .18s ease;
+  }
+
+  .sort-group .btn:last-child{
+    border-right:0 !important;
+  }
+
+  .sort-group .btn:hover{
+    background:rgba(255,255,255,.04);
+    color:#fff;
+  }
+
+  .sort-group .btn.active{
+    background:linear-gradient(180deg, rgba(86,102,153,.28), rgba(56,68,104,.18));
+    color:#fff;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  }
+
+  .write-btn-wrap{
+    display:flex;
+    align-items:center;
+  }
+
+  .write-btn-wrap .btn{
+    width:100%;
+    height:48px;
+    border-radius:18px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:16px;
+    font-weight:500;
+    letter-spacing:.05px;
+    color:#f3deb4;
+    border:1px solid rgba(216,176,106,.20);
+    background:linear-gradient(180deg, rgba(51,63,95,.96), rgba(31,40,65,.96));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.03),
+      0 8px 18px rgba(0,0,0,.12);
+    transition: all .2s ease;
+  }
+
+  .write-btn-wrap .btn:hover{
+    background:linear-gradient(180deg, rgba(61,74,109,.98), rgba(38,48,77,.98));
+    color:#ffe8bc;
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.05),
+      0 0 18px rgba(216,176,106,.10);
+  }
+
+  .search-wrap .form-select,
+  .search-wrap .form-control,
+  .search-wrap .btn{
+    height:48px;
+    border-radius:18px;
+    border-color:rgba(255,255,255,.09);
+    background:rgba(255,255,255,.03);
+    color:var(--arena-text);
+    box-shadow:none;
+    font-weight:500;
+  }
+
+  .search-wrap .form-control::placeholder{
+    color:#8ea0c8;
+  }
+
+  .search-wrap .form-select{
+    background-color:rgba(255,255,255,.03) !important;
+    color:#eef4ff !important;
+  }
+
+  .search-wrap .form-select option{
+    background:#162238 !important;
+    color:#eef4ff !important;
+  }
+
+  .search-wrap .form-select:focus,
+  .search-wrap .form-control:focus{
+    border-color:rgba(124,145,199,.28);
+    box-shadow:0 0 0 .16rem rgba(124,145,199,.08);
+  }
+
+  .search-wrap .btn{
+    background:rgba(255,255,255,.04);
+    color:#eef4ff;
+    min-width:92px;
+    transition: all .18s ease;
+  }
+
+  .search-wrap .btn:hover{
+    background:rgba(255,255,255,.07);
+  }
+
+  .arena-table-wrap{
+    background:linear-gradient(180deg, rgba(255,255,255,.016), rgba(255,255,255,.008));
+    border:1px solid rgba(255,255,255,.05);
+    border-radius:24px;
+    overflow:hidden;
+  }
+
+  .arena-table{
+    margin-bottom:0;
+    table-layout:fixed;
+    color:var(--arena-text);
+  }
+
+  .arena-table thead th{
+    vertical-align:middle;
+    white-space:nowrap;
+    border-bottom:1px solid rgba(255,255,255,.10) !important;
+    background:linear-gradient(90deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+    color:#d9e3f7;
+    font-size:13px;
+    font-weight:500;
+    padding:15px 10px;
+    letter-spacing:.05px;
+  }
+
+  .arena-table tbody td{
+    vertical-align:middle;
+    border-bottom:1px solid rgba(255,255,255,.05) !important;
+    background:transparent;
+    padding:16px 10px;
+    font-weight:400;
+    transition: background .25s ease, transform .25s ease, box-shadow .25s ease, color .25s ease;
+    position: relative;
+    z-index: 2;
+  }
+
+  .arena-row{
+    position:relative;
+    cursor:pointer;
+  }
+
+  .arena-row::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    width:0;
+    height:100%;
+    background:linear-gradient(180deg, rgba(123,147,255,.28), rgba(255,255,255,0));
+    transition:width .22s ease;
+    pointer-events:none;
+    z-index:1;
+  }
+
+  .arena-row::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    opacity:0;
+    transition:opacity .25s ease;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .arena-row:hover::before{
+    width:3px;
+  }
+
+  .arena-row:hover td{
+    background:
+      linear-gradient(90deg, rgba(91,116,196,.08), rgba(255,255,255,.012) 35%, transparent 100%);
+  }
+
+  .arena-row:hover .subject-link{
+    background: linear-gradient(90deg, #ffffff 0%, #dbe5ff 40%, #8eb0ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+            background-clip: text;
+    color: transparent;
+  }
+
+  .arena-row:hover .user-name{
+    color:#ffffff;
+  }
+
+  .arena-row:hover .recommend-badge{
+    transform: translateY(-1px);
+  }
+
+  /* 티어별 행 후광 */
+  .arena-row.row-bronze:hover::after{
+    opacity:1;
+    background:
+      radial-gradient(circle at 55% 50%, rgba(211,138,66,.16), transparent 22%),
+      linear-gradient(90deg, rgba(211,138,66,.07), transparent 45%);
+  }
+
+  .arena-row.row-silver:hover::after{
+    opacity:1;
+    background:
+      radial-gradient(circle at 55% 50%, rgba(217,228,255,.15), transparent 22%),
+      linear-gradient(90deg, rgba(217,228,255,.06), transparent 45%);
+  }
+
+  .arena-row.row-gold:hover::after{
+    opacity:1;
+    background:
+      radial-gradient(circle at 55% 50%, rgba(255,216,106,.18), transparent 24%),
+      linear-gradient(90deg, rgba(255,216,106,.08), transparent 48%);
+  }
+
+  .arena-row.row-platinum:hover::after{
+    opacity:1;
+    background:
+      radial-gradient(circle at 55% 50%, rgba(118,255,243,.18), transparent 24%),
+      linear-gradient(90deg, rgba(118,255,243,.08), transparent 48%);
+  }
+
+  .arena-row.row-diamond:hover::after{
+    opacity:1;
+    background:
+      radial-gradient(circle at 55% 50%, rgba(110,184,255,.18), transparent 24%),
+      linear-gradient(90deg, rgba(110,184,255,.08), transparent 48%);
+  }
+
+  .arena-row.row-master:hover::after{
+    opacity:1;
+    background:
+      radial-gradient(circle at 55% 50%, rgba(197,108,255,.20), transparent 24%),
+      linear-gradient(90deg, rgba(197,108,255,.10), transparent 48%);
+  }
+
+  .arena-row.row-challenger:hover::after{
+    opacity:1;
+    background:
+      radial-gradient(circle at 55% 50%, rgba(255,216,106,.18), transparent 22%),
+      radial-gradient(circle at 62% 50%, rgba(102,184,255,.16), transparent 28%),
+      linear-gradient(90deg, rgba(255,216,106,.08), rgba(102,184,255,.08) 38%, transparent 60%);
+  }
+
+  .arena-table .col-r{ width:82px; }
+  .arena-table .col-subject{ width:44%; }
+  .arena-table .col-tier{ width:190px; }
+  .arena-table .col-user{ width:270px; }
+  .arena-table .col-view{ width:90px; }
+  .arena-table .col-date{ width:120px; }
+
+  .recommend-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:36px;
+    height:30px;
+    padding:0 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:500;
+    background:rgba(255,255,255,.06);
+    color:#d6ddeb;
+    border:1px solid rgba(255,255,255,.05);
+    transition: all .18s ease;
+  }
+
+  .recommend-badge.has-vote{
+    background:linear-gradient(180deg, rgba(216,176,106,.22), rgba(216,176,106,.10));
+    color:#f2d7a4;
+    border-color:rgba(216,176,106,.20);
+    box-shadow:0 0 14px rgba(216,176,106,.06);
+  }
+
+  .subject-cell{
+    padding-left:28px !important;
+  }
+
+  .subject-link{
+    position: relative;
+    z-index: 5;
+    color:#f2f6ff;
+    text-decoration:none;
+    font-weight:500;
+    font-size:16px;
+    line-height:1.45;
+    word-break:break-word;
+    transition: all .25s ease;
+  }
+
+  .subject-link:hover{
+    color:#aec1f3;
+    text-decoration:none;
+  }
+
+  .subject-link.hot-title{
+    background: linear-gradient(90deg, #fff3cc 0%, #e8c877 50%, #ffb7c5 100%);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+            background-clip:text;
+    color:transparent;
+  }
+
+  .subject-link.recommend-title{
+    color:#dde7ff;
+  }
+
+  .comment-count{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:20px;
+    height:20px;
+    padding:0 6px;
+    border-radius:999px;
+    margin-left:6px;
+    font-size:11px;
+    font-weight:500;
+    color:#ffafc2;
+    background:rgba(255,114,143,.10);
+    border:1px solid rgba(255,114,143,.14);
+    vertical-align:middle;
+  }
+
+  .hot-badge,
+  .boost-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    margin-left:8px;
+    padding:3px 8px;
+    border-radius:999px;
+    font-size:10px;
+    font-weight:600;
+    letter-spacing:.25px;
+    vertical-align:middle;
+  }
+
+  .hot-badge{
+    background:linear-gradient(180deg, rgba(255,114,143,.20), rgba(255,114,143,.10));
+    color:#ffc3d0;
+    border:1px solid rgba(255,114,143,.16);
+    box-shadow:0 0 10px rgba(255,114,143,.05);
+  }
+
+  .boost-badge{
+    background:linear-gradient(180deg, rgba(216,176,106,.20), rgba(216,176,106,.10));
+    color:#f2d8a8;
+    border:1px solid rgba(216,176,106,.16);
+    box-shadow:0 0 10px rgba(216,176,106,.05);
+  }
+
+  .tier-image-wrap{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .tier-image{
+    width:42px;
+    height:42px;
+    object-fit:contain;
+    display:block;
+    transition: transform .22s ease, filter .22s ease;
+  }
+
+  .rank-inline{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+    position: relative;
+    z-index: 3;
+  }
+
+  .rank-label{
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:.05px;
+    white-space:nowrap;
+    line-height:1;
+    transition: all .22s ease;
+  }
+
+  .rank-bronze .rank-label{
+    background:linear-gradient(180deg, var(--bronze-1), var(--bronze-2));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+            background-clip:text;
+    color:transparent;
+  }
+
+  .rank-silver .rank-label{
+    background:linear-gradient(180deg, var(--silver-1), var(--silver-2));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+            background-clip:text;
+    color:transparent;
+  }
+
+  .rank-gold .rank-label{
+    background:linear-gradient(180deg, var(--gold-1), var(--gold-2));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+            background-clip:text;
+    color:transparent;
+  }
+
+  .rank-platinum .rank-label{
+    background:linear-gradient(180deg, var(--platinum-1), var(--platinum-2));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+            background-clip:text;
+    color:transparent;
+  }
+
+  .rank-diamond .rank-label{
+    background:linear-gradient(180deg, var(--diamond-1), var(--diamond-2));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+            background-clip:text;
+    color:transparent;
+  }
+
+  .rank-master .rank-label{
+    background:linear-gradient(180deg, var(--master-1), var(--master-2));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+            background-clip:text;
+    color:transparent;
+  }
+
+  .rank-challenger .rank-label{
+    background:linear-gradient(90deg, var(--challenger-1), var(--challenger-2));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+            background-clip:text;
+    color:transparent;
+    text-shadow:0 0 10px rgba(255,216,94,.10);
+  }
+
+  .rank-bronze .tier-image{
+    filter:
+      drop-shadow(0 0 4px rgba(211,138,66,.26))
+      drop-shadow(0 0 10px rgba(211,138,66,.14));
+  }
+
+  .rank-silver .tier-image{
+    filter:
+      drop-shadow(0 0 5px rgba(217,228,255,.28))
+      drop-shadow(0 0 11px rgba(217,228,255,.14));
+  }
+
+  .rank-gold .tier-image{
+    filter:
+      drop-shadow(0 0 6px rgba(255,216,106,.34))
+      drop-shadow(0 0 13px rgba(255,216,106,.18));
+  }
+
+  .rank-platinum .tier-image{
+    filter:
+      drop-shadow(0 0 6px rgba(118,255,243,.30))
+      drop-shadow(0 0 13px rgba(118,255,243,.16));
+  }
+
+  .rank-diamond .tier-image{
+    filter:
+      drop-shadow(0 0 7px rgba(110,184,255,.34))
+      drop-shadow(0 0 15px rgba(110,184,255,.18));
+  }
+
+  .rank-master .tier-image{
+    filter:
+      drop-shadow(0 0 8px rgba(197,108,255,.36))
+      drop-shadow(0 0 16px rgba(197,108,255,.20));
+  }
+
+  .rank-challenger .tier-image{
+    filter:
+      drop-shadow(0 0 8px rgba(255,216,106,.34))
+      drop-shadow(0 0 16px rgba(102,184,255,.22))
+      drop-shadow(0 0 22px rgba(255,216,106,.12));
+  }
+
+  .arena-row:hover .rank-bronze .tier-image{
+    transform:translateY(-1px) scale(1.14);
+    filter:
+      drop-shadow(0 0 8px rgba(211,138,66,.50))
+      drop-shadow(0 0 18px rgba(211,138,66,.28));
+  }
+
+  .arena-row:hover .rank-silver .tier-image{
+    transform:translateY(-1px) scale(1.14);
+    filter:
+      drop-shadow(0 0 9px rgba(217,228,255,.50))
+      drop-shadow(0 0 18px rgba(217,228,255,.28));
+  }
+
+  .arena-row:hover .rank-gold .tier-image{
+    transform:translateY(-1px) scale(1.15);
+    filter:
+      drop-shadow(0 0 11px rgba(255,216,106,.64))
+      drop-shadow(0 0 22px rgba(255,216,106,.34));
+  }
+
+  .arena-row:hover .rank-platinum .tier-image{
+    transform:translateY(-1px) scale(1.15);
+    filter:
+      drop-shadow(0 0 10px rgba(118,255,243,.60))
+      drop-shadow(0 0 22px rgba(118,255,243,.32));
+  }
+
+  .arena-row:hover .rank-diamond .tier-image{
+    transform:translateY(-1px) scale(1.16);
+    filter:
+      drop-shadow(0 0 12px rgba(110,184,255,.64))
+      drop-shadow(0 0 24px rgba(110,184,255,.36));
+  }
+
+  .arena-row:hover .rank-master .tier-image{
+    transform:translateY(-1px) scale(1.16);
+    filter:
+      drop-shadow(0 0 12px rgba(197,108,255,.68))
+      drop-shadow(0 0 24px rgba(197,108,255,.38));
+  }
+
+  .arena-row:hover .rank-challenger .tier-image{
+    transform:translateY(-2px) scale(1.18);
+    filter:
+      drop-shadow(0 0 12px rgba(255,216,106,.74))
+      drop-shadow(0 0 22px rgba(102,184,255,.44))
+      drop-shadow(0 0 30px rgba(255,216,106,.24));
+  }
+
+  .arena-row:hover .rank-label{
+    transform:translateY(-1px);
+  }
+
+  .user-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:8px;
+    flex-wrap:wrap;
+    padding-left:10px;
+    position: relative;
+    z-index: 3;
+  }
+
+  .user-name{
+    font-weight:500;
+    color:#f4f8ff;
+    word-break:break-word;
+  }
+
+  .challenger-mark{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    font-size:11px;
+    background:rgba(216,176,106,.15);
+    color:#f4d88d;
+    box-shadow:0 0 10px rgba(216,176,106,.10);
+  }
+
+  .mobile-inline-meta{
+    display:none;
+  }
+
+  .col-view,
+  .col-date{
+    color:#c7d3ee;
+    font-weight:500;
+  }
+
+  .row-hot td{
+    background:linear-gradient(90deg, rgba(255,114,143,.04), transparent 30%) !important;
+  }
+
+  .row-boost td{
+    background:linear-gradient(90deg, rgba(216,176,106,.04), transparent 28%) !important;
+  }
+
+  .empty-row td{
+    padding:30px 16px;
+    text-align:center;
+    color:var(--arena-muted);
+    background:transparent !important;
+  }
+
+  .arena-pagination{
+    margin-top:18px;
+  }
+
+  .arena-pagination .page-link{
+    background:rgba(255,255,255,.03);
+    border-color:rgba(255,255,255,.08);
+    color:#d8e2ff;
+    min-width:44px;
+    text-align:center;
+    font-weight:500;
+  }
+
+  .arena-pagination .page-item.active .page-link{
+    background:linear-gradient(180deg, #506fe0, #3958c2);
+    border-color:#506fe0;
+    color:#fff;
+    box-shadow:0 0 14px rgba(80,111,224,.20);
+  }
+
+  .arena-pagination .page-item.disabled .page-link{
+    background:rgba(255,255,255,.02);
+    color:#6e7b99;
+  }
+
+  @media (max-width: 768px){
+    .arena-shell{
+      padding:18px 14px;
+      border-radius:22px;
+    }
+
+    .arena-title{
+      margin-bottom:16px;
+      font-size:16px;
+      font-weight:600;
+    }
+
+    .arena-toolbar{
+      gap:12px;
+    }
+
+    .sort-group{
+      width:100%;
+      display:flex;
+    }
+
+    .sort-group .btn{
+      flex:1;
+    }
+
+    .write-btn-wrap{
+      width:100%;
+    }
+
+    .search-wrap .row{
+      --bs-gutter-x: 8px;
+    }
+
+    .search-wrap .col-4{
+      width:34%;
+    }
+
+    .search-wrap .col-8{
+      width:66%;
+    }
+
+    .search-wrap .input-group{
+      flex-wrap:nowrap;
+    }
+
+    .search-wrap .form-control{
+      min-width:0;
+    }
+
+    .search-wrap .btn{
+      white-space:nowrap;
+      min-width:78px;
+    }
+
+    .arena-table,
+    .arena-table tbody,
+    .arena-table tr,
+    .arena-table td{
+      display:block;
+      width:100%;
+    }
+
+    .arena-table thead{
+      display:none;
+    }
+
+    .arena-table tbody tr.arena-row{
+      position:relative;
+      padding:14px 0;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .arena-table tbody td{
+      border:0 !important;
+      padding:0 !important;
+      background:transparent !important;
+    }
+
+    .arena-table .col-tier,
+    .arena-table .col-view,
+    .arena-table .col-date{
+      display:none !important;
+    }
+
+    .arena-table .col-r{
+      position:absolute;
+      top:12px;
+      right:0;
+      width:auto !important;
+      z-index:6;
+    }
+
+    .arena-table .col-subject{
+      width:100% !important;
+      padding-right:54px !important;
+      padding-left:8px !important;
+      margin-bottom:10px;
+    }
+
+    .arena-table .col-subject .subject-link{
+      display:block;
+      font-size:17px;
+      font-weight:500;
+      line-height:1.42;
+      color:#f7f9ff;
+      padding-right:6px;
+    }
+
+    .arena-table .col-user{
+      margin-bottom:0;
+      padding-left:8px !important;
+    }
+
+    .arena-table .user-wrap{
+      gap:7px;
+      line-height:1.65;
+      padding-left:0;
+    }
+
+    .arena-table .user-name{
+      font-size:13px;
+      font-weight:500;
+      color:#edf2ff;
+    }
+
+    .tier-image{
+      width:24px;
+      height:24px;
+    }
+
+    .rank-label{
+      font-size:11px;
+    }
+
+    .mobile-inline-meta{
+      display:inline-block !important;
+      font-size:12px;
+      color:#8fa0c4;
+      font-weight:500;
+    }
+
+    .mobile-inline-meta .meta-sep{
+      margin:0 5px;
+      color:#516180;
+    }
+
+    .recommend-badge{
+      min-width:30px;
+      height:28px;
+      padding:0 9px;
+      font-size:11px;
+      font-weight:500;
+    }
+
+    .comment-count{
+      font-size:11px;
+      font-weight:500;
+    }
+
+    .hot-badge,
+    .boost-badge{
+      margin-left:6px;
+      font-size:10px;
+      padding:2px 6px;
+      font-weight:600;
+    }
+  }
+</style>
+
+<div class="container my-3 arena-board-wrap">
+  <div class="arena-shell">
+    <h5 class="arena-title">Arena Board</h5>
+
+    <div class="row align-items-center gy-2 arena-toolbar">
+      <div class="col-12 col-md-3">
+        <div class="btn-group sort-group" role="group">
+          <button
+            type="button"
+            class="btn btn-sm so {% if sort_by == 'recent' or not sort_by %}active{% endif %}"
+            data-so="recent"
+            title="Recent">
+            <i class="fas fa-list"></i>
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm so {% if sort_by == 'recommend' %}active{% endif %}"
+            data-so="recommend"
+            title="Recommended">
+            <i class="fas fa-thumbs-up"></i>
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm so {% if sort_by == 'popular' %}active{% endif %}"
+            data-so="popular"
+            title="Popular">
+            <i class="fas fa-fire"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-2 write-btn-wrap">
+        <a href="{% url 'arena:question_create' %}" class="btn">Write</a>
+      </div>
+
+      <div class="col-12 col-md-7 search-wrap">
+        <div class="row g-2">
+          <div class="col-4 col-md-3">
+            <select class="form-select" id="search_option">
+              <option value="all" {% if search_option == 'all' %}selected{% endif %}>All</option>
+              <option value="title" {% if search_option == 'title' %}selected{% endif %}>Title</option>
+              <option value="content" {% if search_option == 'content' %}selected{% endif %}>Content</option>
+              <option value="comment" {% if search_option == 'comment' %}selected{% endif %}>Comment</option>
+              <option value="nickname" {% if search_option == 'nickname' %}selected{% endif %}>User</option>
+            </select>
+          </div>
+          <div class="col-8 col-md-9">
+            <div class="input-group">
+              <input
+                type="text"
+                id="search_kw"
+                class="form-control"
+                value="{{ kw|default_if_none:'' }}"
+                placeholder="Search posts">
+              <button class="btn btn-outline-secondary" type="button" id="btn_search">Search</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arena-table-wrap">
+      <table class="table arena-table" id="questionTable">
+        <thead>
+          <tr class="text-center">
+            <th class="col-r">R</th>
+            <th class="col-subject">Subject</th>
+            <th class="col-tier">Tier</th>
+            <th class="col-user">User</th>
+            <th class="col-view">View</th>
+            <th class="col-date">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if question_list %}
+            {% for question in question_list %}
+            <tr
+              class="text-center arena-row
+                {% if question.author_tier == 'Bronze' %}row-bronze{% elif question.author_tier == 'Silver' %}row-silver{% elif question.author_tier == 'Gold' %}row-gold{% elif question.author_tier == 'Platinum' %}row-platinum{% elif question.author_tier == 'Diamond' %}row-diamond{% elif question.author_tier == 'Master' %}row-master{% elif question.author_tier == 'Challenger' %}row-challenger{% endif %}
+                {% if question.vote_count >= 5 %} row-hot{% elif question.vote_count >= 2 %} row-boost{% endif %}"
+              data-href="{% url 'arena:detail' question.id %}">
+              <td class="align-middle col-r">
+                <span
+                  id="recommendCount{{ question.id }}"
+                  class="recommend-badge {% if question.vote_count > 0 %}has-vote{% endif %}">
+                  {{ question.vote_count|default:0 }}
+                </span>
+              </td>
+
+              <td class="text-start align-middle col-subject subject-cell">
+                <a href="{% url 'arena:detail' question.id %}"
+                   class="subject-link row-link{% if question.vote_count >= 5 %} hot-title{% elif question.vote_count >= 2 %} recommend-title{% endif %}">
+                  {{ question.subject }}
+                </a>
+
+                {% if question.answers.count > 0 %}
+                  <span class="comment-count">{{ question.answers.count }}</span>
+                {% endif %}
+
+                {% if question.vote_count >= 5 %}
+                  <span class="hot-badge">HOT</span>
+                {% elif question.vote_count >= 2 %}
+                  <span class="boost-badge">BOOST</span>
+                {% endif %}
+              </td>
+
+              <td class="align-middle col-tier">
+                <div class="rank-inline
+                  {% if question.author_tier == 'Bronze' %}rank-bronze{% elif question.author_tier == 'Silver' %}rank-silver{% elif question.author_tier == 'Gold' %}rank-gold{% elif question.author_tier == 'Platinum' %}rank-platinum{% elif question.author_tier == 'Diamond' %}rank-diamond{% elif question.author_tier == 'Master' %}rank-master{% elif question.author_tier == 'Challenger' %}rank-challenger{% else %}rank-bronze{% endif %}">
+                  <span class="tier-image-wrap">
+                    {% if question.author_tier == "Bronze" %}
+                      <img src="{% static 'tier/bronze.svg' %}" alt="Bronze" class="tier-image">
+                    {% elif question.author_tier == "Silver" %}
+                      <img src="{% static 'tier/silver.svg' %}" alt="Silver" class="tier-image">
+                    {% elif question.author_tier == "Gold" %}
+                      <img src="{% static 'tier/gold.svg' %}" alt="Gold" class="tier-image">
+                    {% elif question.author_tier == "Platinum" %}
+                      <img src="{% static 'tier/platinum.svg' %}" alt="Platinum" class="tier-image">
+                    {% elif question.author_tier == "Diamond" %}
+                      <img src="{% static 'tier/diamond.svg' %}" alt="Diamond" class="tier-image">
+                    {% elif question.author_tier == "Master" %}
+                      <img src="{% static 'tier/master.svg' %}" alt="Master" class="tier-image">
+                    {% elif question.author_tier == "Challenger" %}
+                      <img src="{% static 'tier/challenger.svg' %}" alt="Challenger" class="tier-image">
+                    {% else %}
+                      <img src="{% static 'tier/bronze.svg' %}" alt="Bronze" class="tier-image">
+                    {% endif %}
+                  </span>
+                  <span class="rank-label">{{ question.author_tier }}</span>
+                </div>
+              </td>
+
+              <td class="align-middle col-user">
+                <div class="user-wrap">
+                  <span class="user-name">{{ question.author.username }}</span>
+
+                  {% if question.author_tier == "Challenger" %}
+                    <span class="challenger-mark">🔥</span>
+                  {% endif %}
+
+                  <span class="d-inline-flex d-md-none
+                    {% if question.author_tier == 'Bronze' %}rank-inline rank-bronze{% elif question.author_tier == 'Silver' %}rank-inline rank-silver{% elif question.author_tier == 'Gold' %}rank-inline rank-gold{% elif question.author_tier == 'Platinum' %}rank-inline rank-platinum{% elif question.author_tier == 'Diamond' %}rank-inline rank-diamond{% elif question.author_tier == 'Master' %}rank-inline rank-master{% elif question.author_tier == 'Challenger' %}rank-inline rank-challenger{% else %}rank-inline rank-bronze{% endif %}">
+                    <span class="tier-image-wrap">
+                      {% if question.author_tier == "Bronze" %}
+                        <img src="{% static 'tier/bronze.svg' %}" alt="Bronze" class="tier-image">
+                      {% elif question.author_tier == "Silver" %}
+                        <img src="{% static 'tier/silver.svg' %}" alt="Silver" class="tier-image">
+                      {% elif question.author_tier == "Gold" %}
+                        <img src="{% static 'tier/gold.svg' %}" alt="Gold" class="tier-image">
+                      {% elif question.author_tier == "Platinum" %}
+                        <img src="{% static 'tier/platinum.svg' %}" alt="Platinum" class="tier-image">
+                      {% elif question.author_tier == "Diamond" %}
+                        <img src="{% static 'tier/diamond.svg' %}" alt="Diamond" class="tier-image">
+                      {% elif question.author_tier == "Master" %}
+                        <img src="{% static 'tier/master.svg' %}" alt="Master" class="tier-image">
+                      {% elif question.author_tier == "Challenger" %}
+                        <img src="{% static 'tier/challenger.svg' %}" alt="Challenger" class="tier-image">
+                      {% else %}
+                        <img src="{% static 'tier/bronze.svg' %}" alt="Bronze" class="tier-image">
+                      {% endif %}
+                    </span>
+                    <span class="rank-label">{{ question.author_tier }}</span>
+                  </span>
+
+                  <span class="mobile-inline-meta d-inline-block d-md-none">
+                    <span class="meta-sep">·</span>
+                    <span>Views {{ question.views }}</span>
+                    <span class="meta-sep">·</span>
+                    <span>{{ question.create_date|date:"y.m/d" }}</span>
+                  </span>
+                </div>
+              </td>
+
+              <td class="align-middle col-view">{{ question.views }}</td>
+              <td class="align-middle col-date">{{ question.create_date|date:"y.m/d" }}</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr class="empty-row">
+              <td colspan="6">No questions available.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="pagination justify-content-center arena-pagination">
+      {% if question_list.has_previous %}
+        <li class="page-item">
+          <a class="page-link" data-page="{{ question_list.previous_page_number }}" href="javascript:void(0)">Prev</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled">
+          <a class="page-link" tabindex="-1" aria-disabled="true" href="#">Prev</a>
+        </li>
+      {% endif %}
+
+      {% for page_number in question_list.paginator.page_range %}
+        {% if page_number >= question_list.number|add:-5 and page_number <= question_list.number|add:5 %}
+          {% if page_number == question_list.number %}
+            <li class="page-item active" aria-current="page">
+              <a class="page-link" data-page="{{ page_number }}" href="javascript:void(0)">{{ page_number }}</a>
+            </li>
+          {% else %}
+            <li class="page-item">
+              <a class="page-link" data-page="{{ page_number }}" href="javascript:void(0)">{{ page_number }}</a>
+            </li>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+
+      {% if question_list.has_next %}
+        <li class="page-item">
+          <a class="page-link" data-page="{{ question_list.next_page_number }}" href="javascript:void(0)">Next</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled">
+          <a class="page-link" tabindex="-1" aria-disabled="true" href="#">Next</a>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script type="text/javascript">
+  $(document).ready(function () {
+    highlightRecommendations();
+
+    const currentSortOption = getParameterByName("sort_by");
+    if (currentSortOption) {
+      $(".so").removeClass("active");
+      $(`.so[data-so="${currentSortOption}"]`).addClass("active");
+    }
+
+    const currentSearchOption = getParameterByName("search_option");
+    if (currentSearchOption) {
+      $("#search_option").val(currentSearchOption);
+    }
+
+    $(".page-link").on("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const page = $(this).data("page");
+      if (!page) return;
+
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set("page", page);
+      searchParams.set("sort_by", getSortOption() || "recent");
+      searchParams.set("search_option", getSearchOption() || "all");
+      searchParams.set("kw", $("#search_kw").val() || "");
+
+      window.location.href = "{% url 'arena:index' %}?" + searchParams.toString();
+    });
+
+    $("#btn_search").on("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set("kw", $("#search_kw").val() || "");
+      searchParams.set("page", 1);
+      searchParams.set("search_option", getSearchOption() || "all");
+      searchParams.set("sort_by", getSortOption() || "recent");
+
+      window.location.href = "{% url 'arena:index' %}?" + searchParams.toString();
+    });
+
+    $("#search_kw").on("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        $("#btn_search").click();
+      }
+    });
+
+    $(".so").on("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $(".so").removeClass("active");
+      $(this).addClass("active");
+
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set("sort_by", $(this).data("so"));
+      searchParams.set("page", 1);
+      searchParams.set("search_option", getSearchOption() || "all");
+      searchParams.set("kw", $("#search_kw").val() || "");
+
+      window.location.href = "{% url 'arena:index' %}?" + searchParams.toString();
+    });
+
+    $(".arena-row").on("click", function (e) {
+      const $target = $(e.target);
+
+      if (
+        $target.closest("a").length ||
+        $target.closest("button").length ||
+        $target.closest("input").length ||
+        $target.closest("select").length ||
+        $target.closest(".page-link").length ||
+        $target.closest(".so").length
+      ) {
+        return;
+      }
+
+      const href = $(this).data("href");
+      if (href) {
+        window.location.href = href;
+      }
+    });
+  });
+
+  function getSearchOption() {
+    return $("#search_option").val();
+  }
+
+  function getSortOption() {
+    return $(".so.active").data("so");
+  }
+
+  function highlightRecommendations() {
+    $('[id^="recommendCount"]').each(function () {
+      const recommendCount = parseInt($(this).text(), 10) || 0;
+      if (recommendCount > 0) {
+        $(this).addClass("has-vote");
+      } else {
+        $(this).removeClass("has-vote");
+      }
+    });
+  }
+
+  function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
+    const results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+  }
+</script>
+{% endblock %}
